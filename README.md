@@ -1,6 +1,6 @@
 # CO2SYS.jl
 
-**Work in progress:** porting CO2SYS v2.0 into Julia.
+**Work in progress:** porting CO2SYS v2.0.5 into Julia.
 
 Original README for MATLAB version follows.
 
