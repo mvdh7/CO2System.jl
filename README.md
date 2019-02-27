@@ -1,3 +1,11 @@
+# CO2SYS.jl
+
+**Work in progress:** porting CO2SYS v2.0 into Julia.
+
+Original README for MATLAB version follows.
+
+<hr />
+
 **CITATION**
 
 - If you use any CO2SYS related software, please cite the original work by Lewis and Wallace (1998).
@@ -6,12 +14,12 @@
 
 **CO2SYS-MATLAB versions**
 
-- 1.1   (Sept 2011): van Heuven et al. (2011) 
+- 1.1   (Sept 2011): van Heuven et al. (2011)
 - 2.0   (20 Dec 2016): includes uncertainty propagation
 - 2.0.1 (11 Oct 2017): supports TEOS-10 standards (conservattive temperature, absolute salinity)
 - 2.0.2 (17 Oct 2017): Octave enhancements changed to be MATLAB compatible
 - 2.0.3 (4 Jun 2018): examples added as Jupyter notebooks
-- 2.0.4 (10 Nov 2018): defaults for standard uncertainties in constants (epK vector and eBt) made consistent with Orr et al. (2018), i.e., final published version 
+- 2.0.4 (10 Nov 2018): defaults for standard uncertainties in constants (epK vector and eBt) made consistent with Orr et al. (2018), i.e., final published version
 - 2.0.5 (23 Nov 2018): fixed bug in eBt propagation to deriv array (thanks A. Cochon)
 
 **ABOUT CO2SYS**
@@ -101,4 +109,3 @@ van Heuven, S., D. Pierrot, J.W.B. Rae, E. Lewis, and D.W.R. Wallace (2011)
 MATLAB Program Developed for CO2 System Calculations. ORNL/CDIAC-105b.  Carbon
 Dioxide Information Analysis Center, Oak Ridge National Laboratory, U.S.
 Department of Energy, Oak Ridge, Tennessee. https://doi.org/10.3334/CDIAC/otg.CO2SYS_MATLAB_v1.1
-
