@@ -267,14 +267,14 @@ function CO2SYS(PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,
 
 
 
-# # Declare global variables
-# global pHScale WhichKs WhoseKSO4 Pbar
-# global Sal sqrSal TempK logTempK TempCi TempCo Pdbari Pdbaro
-# global FugFac VPFac PengCorrection ntps RGasConstant
-# global fH RT
-# global K0 K1 K2 KW KB KF KS KP1 KP2 KP3 KSi
-# global TB TF TS TP TSi F
-#
+# Declare global variables
+global pHScale, WhichKs, WhoseKSO4, Pbar
+global Sal, sqrSal, TempK, logTempK, TempCi, TempCo, Pdbari, Pdbaro
+global FugFac, VPFac, PengCorrection, ntps, RGasConstant
+global fH, RT
+global K0, K1, K2, KW, KB, KF, KS, KP1, KP2, KP3, KSi
+global TB, TF, TS, TP, TSi, F
+
 # # Added by JM Epitalon
 # # For computing derivative with respect to Ks, one has to call CO2sys with a perturbed K
 # # Requested perturbation is passed through the following global variables
@@ -378,10 +378,9 @@ F = p2 .== 5; FC[F] = PAR2[F] / 1e6 # Convert from microatm. to atm.
 # Generate the columns holding Si, Phos and Sal.
 # Pure Water case:
 F = WhichKs .== 8
-Sal = fill(NaN,ntps)
 Sal[F] .= 0.0
 # GEOSECS and Pure Water:
-F = @. WhichKs == 8 | WhichKs == 6
+F = @. (WhichKs == 8) | (WhichKs == 6)
 TP[F]  .= 0.0
 TSi[F] .= 0.0
 # All other cases
@@ -395,10 +394,10 @@ TSi[F] /= 1e6
 PengCorrection = zeros(ntps)
 F = WhichKs .== 7; PengCorrection[F] = TP[F]
 
-# # Calculate the constants for all samples at input conditions
-# # The constants calculated for each sample will be on the appropriate pH scale!
-# Constants(TempCi,Pdbari);
-#
+# Calculate the constants for all samples at input conditions
+# The constants calculated for each sample will be on the appropriate pH scale!
+Constants(TempCi,Pdbari)
+
 # # Added by JM Epitalon
 # # For computing derivative with respect to Ks, one has to perturb the value of one K
 # # Requested perturbation is passed through global variables PertK and Perturb
@@ -438,31 +437,31 @@ F = WhichKs .== 7; PengCorrection[F] = TP[F]
 # # Calculate missing values for AT,CT,PH,FC:
 # # pCO2 will be calculated later on, routines work with fCO2.
 # F=Icase==12; # input TA, TC
-# if any[F]
+# if any(F)
 #     [PHic[F] FCic[F]] = CalculatepHfCO2fromTATC(TAc[F]-PengCorrection[F], TCc[F]);
 # end
 # F=Icase==13; # input TA, pH
-# if any[F]
+# if any(F)
 #     TCc[F]  =   CalculateTCfromTApH(TAc[F]-PengCorrection[F], PHic[F]);
 #     FCic[F] = CalculatefCO2fromTCpH(TCc[F], PHic[F]);
 # end
 # F=Icase==14 | Icase==15; # input TA, (pCO2 or fCO2)
-# if any[F]
+# if any(F)
 #     PHic[F] = CalculatepHfromTAfCO2(TAc[F]-PengCorrection[F], FCic[F]);
 #     TCc[F]  = CalculateTCfromTApH  (TAc[F]-PengCorrection[F], PHic[F]);
 # end
 # F=Icase==23; # input TC, pH
-# if any[F]
+# if any(F)
 #     TAc[F]  = CalculateTAfromTCpH  (TCc[F], PHic[F]) + PengCorrection[F];
 #     FCic[F] = CalculatefCO2fromTCpH(TCc[F], PHic[F]);
 # end
 # F=Icase==24 | Icase==25;  # input TC, (pCO2 or fCO2)
-# if any[F]
+# if any(F)
 #     PHic[F] = CalculatepHfromTCfCO2(TCc[F], FCic[F]);
 #     TAc[F]  = CalculateTAfromTCpH  (TCc[F], PHic[F]) + PengCorrection[F];
 # end
 # F=Icase==34 | Icase==35; # input pH, (pCO2 or fCO2)
-# if any[F]
+# if any(F)
 #     TCc[F]  = CalculateTCfrompHfCO2(PHic[F], FCic[F]);
 #     TAc[F]  = CalculateTAfromTCpH  (TCc[F],  PHic[F]) + PengCorrection[F];
 # end
@@ -547,104 +546,104 @@ F = WhichKs .== 7; PengCorrection[F] = TP[F]
 #       TEMPIN         TEMPOUT         PRESIN         PRESOUT         PAR1TYPE
 #       PAR2TYPE       K1K2CONSTANTS   KSO4CONSTANTS  pHSCALEIN       SAL
 #       PO4            SI              KIVEC          KOVEC           TVEC*1e6]
-#
-# HEADERS={'TAlk';'TCO2';'pHin';'pCO2in';'fCO2in';'HCO3in';'CO3in';
-#     'CO2in';'BAlkin';'OHin';'PAlkin';'SiAlkin';'Hfreein';'RFin';
-#     'OmegaCAin';'OmegaARin';'xCO2in';'pHout';'pCO2out';'fCO2out';
-#     'HCO3out';'CO3out';'CO2out';'BAlkout';'OHout';'PAlkout';
-#     'SiAlkout';'Hfreeout';'RFout';'OmegaCAout';'OmegaARout';'xCO2out';
-#     'pHinTOTAL';'pHinSWS';'pHinFREE';'pHinNBS';
-#     'pHoutTOTAL';'pHoutSWS';'pHoutFREE';'pHoutNBS';'TEMPIN';'TEMPOUT';
-#     'PRESIN';'PRESOUT';'PAR1TYPE';'PAR2TYPE';'K1K2CONSTANTS';'KSO4CONSTANTS';
-#     'pHSCALEIN';'SAL';'PO4';'SI';'K0input';'K1input';'K2input';'pK1input';
-#     'pK2input';'KWinput';'KBinput';'KFinput';'KSinput';'KP1input';'KP2input';
-#     'KP3input';'KSiinput';'K0output';'K1output';'K2output';'pK1output';
-#     'pK2output';'KWoutput';'KBoutput';'KFoutput';'KSoutput';'KP1output';
-#     'KP2output';'KP3output';'KSioutput';'TB';'TF';'TS';};
-#
-# NICEHEADERS={
-#     '01 - TAlk             (umol/kgSW) ';
-#     '02 - TCO2             (umol/kgSW) ';
-#     '03 - pHin             ()          ';
-#     '04 - pCO2in           (uatm)      ';
-#     '05 - fCO2in           (uatm)      ';
-#     '06 - HCO3in           (umol/kgSW) ';
-#     '07 - CO3in            (umol/kgSW) ';
-#     '08 - CO2in            (umol/kgSW) ';
-#     '09 - BAlkin           (umol/kgSW) ';
-#     '10 - OHin             (umol/kgSW) ';
-#     '11 - PAlkin           (umol/kgSW) ';
-#     '12 - SiAlkin          (umol/kgSW) ';
-#     '13 - Hfreein          (umol/kgSW) ';
-#     '14 - RevelleFactorin  ()          ';
-#     '15 - OmegaCain        ()          ';
-#     '16 - OmegaArin        ()          ';
-#     '17 - xCO2in           (ppm)       ';
-#     '18 - pHout            ()          ';
-#     '19 - pCO2out          (uatm)      ';
-#     '20 - fCO2out          (uatm)      ';
-#     '21 - HCO3out          (umol/kgSW) ';
-#     '22 - CO3out           (umol/kgSW) ';
-#     '23 - CO2out           (umol/kgSW) ';
-#     '24 - BAlkout          (umol/kgSW) ';
-#     '25 - OHout            (umol/kgSW) ';
-#     '26 - PAlkout          (umol/kgSW) ';
-#     '27 - SiAlkout         (umol/kgSW) ';
-#     '28 - Hfreeout         (umol/kgSW) '; ### Changed 'Hfreein' to 'Hfreeout', svh20100827
-#     '29 - RevelleFactorout ()          ';
-#     '30 - OmegaCaout       ()          ';
-#     '31 - OmegaArout       ()          ';
-#     '32 - xCO2out          (ppm)       ';
-#     '33 - pHin (Total)     ()          ';
-#     '34 - pHin (SWS)       ()          ';
-#     '35 - pHin (Free)      ()          ';
-#     '36 - pHin (NBS )      ()          ';
-#     '37 - pHout(Total)     ()          ';
-#     '38 - pHout(SWS)       ()          ';
-#     '39 - pHout(Free)      ()          ';
-#     '40 - pHout(NBS )      ()          ';
-#     '41 - TEMPIN           (Deg C)     ';
-#     '42 - TEMPOUT          (Deg C)     ';
-#     '43 - PRESIN           (dbar)      ';
-#     '44 - PRESOUT          (dbar)      ';
-#     '45 - PAR1TYPE         ()          ';
-#     '46 - PAR2TYPE         ()          ';
-#     '47 - K1K2CONSTANTS    ()          ';
-#     '48 - KSO4CONSTANTS    ()          ';
-#     '49 - pHSCALEIN        ()          ';
-#     '50 - SAL              (umol/kgSW) ';
-#     '51 - PO4              (umol/kgSW) ';
-#     '52 - SI               (umol/kgSW) ';
-#     '53 - K0input          ()          ';
-#     '54 - K1input          ()          ';
-#     '55 - K2input          ()          ';
-#     '56 - pK1input         ()          ';
-#     '57 - pK2input         ()          ';
-#     '58 - KWinput          ()          ';
-#     '59 - KBinput          ()          ';
-#     '60 - KFinput          ()          ';
-#     '61 - KSinput          ()          ';
-#     '62 - KP1input         ()          ';
-#     '63 - KP2input         ()          ';
-#     '64 - KP3input         ()          ';
-#     '65 - KSiinput         ()          ';
-#     '66 - K0output         ()          ';
-#     '67 - K1output         ()          ';
-#     '68 - K2output         ()          ';
-#     '69 - pK1output        ()          ';
-#     '70 - pK2output        ()          ';
-#     '71 - KWoutput         ()          ';
-#     '72 - KBoutput         ()          ';
-#     '73 - KFoutput         ()          ';
-#     '74 - KSoutput         ()          ';
-#     '75 - KP1output        ()          ';
-#     '76 - KP2output        ()          ';
-#     '77 - KP3output        ()          ';
-#     '78 - KSioutput        ()          ';
-#     '79 - TB               (umol/kgSW) ';
-#     '80 - TF               (umol/kgSW) ';
-#     '81 - TS               (umol/kgSW) '};
-#
+
+HEADERS = ["TAlk","TCO2","pHin","pCO2in","fCO2in","HCO3in","CO3in",
+    "CO2in","BAlkin","OHin","PAlkin","SiAlkin","Hfreein","RFin",
+    "OmegaCAin","OmegaARin","xCO2in","pHout","pCO2out","fCO2out",
+    "HCO3out","CO3out","CO2out","BAlkout","OHout","PAlkout",
+    "SiAlkout","Hfreeout","RFout","OmegaCAout","OmegaARout","xCO2out",
+    "pHinTOTAL","pHinSWS","pHinFREE","pHinNBS",
+    "pHoutTOTAL","pHoutSWS","pHoutFREE","pHoutNBS","TEMPIN","TEMPOUT",
+    "PRESIN","PRESOUT","PAR1TYPE","PAR2TYPE","K1K2CONSTANTS","KSO4CONSTANTS",
+    "pHSCALEIN","SAL","PO4","SI","K0input","K1input","K2input","pK1input",
+    "pK2input","KWinput","KBinput","KFinput","KSinput","KP1input","KP2input",
+    "KP3input","KSiinput","K0output","K1output","K2output","pK1output",
+    "pK2output","KWoutput","KBoutput","KFoutput","KSoutput","KP1output",
+    "KP2output","KP3output","KSioutput","TB","TF","TS"]
+
+    NICEHEADERS = [
+        "01 - TAlk             (umol/kgSW) ",
+        "02 - TCO2             (umol/kgSW) ",
+        "03 - pHin             ()          ",
+        "04 - pCO2in           (uatm)      ",
+        "05 - fCO2in           (uatm)      ",
+        "06 - HCO3in           (umol/kgSW) ",
+        "07 - CO3in            (umol/kgSW) ",
+        "08 - CO2in            (umol/kgSW) ",
+        "09 - BAlkin           (umol/kgSW) ",
+        "10 - OHin             (umol/kgSW) ",
+        "11 - PAlkin           (umol/kgSW) ",
+        "12 - SiAlkin          (umol/kgSW) ",
+        "13 - Hfreein          (umol/kgSW) ",
+        "14 - RevelleFactorin  ()          ",
+        "15 - OmegaCain        ()          ",
+        "16 - OmegaArin        ()          ",
+        "17 - xCO2in           (ppm)       ",
+        "18 - pHout            ()          ",
+        "19 - pCO2out          (uatm)      ",
+        "20 - fCO2out          (uatm)      ",
+        "21 - HCO3out          (umol/kgSW) ",
+        "22 - CO3out           (umol/kgSW) ",
+        "23 - CO2out           (umol/kgSW) ",
+        "24 - BAlkout          (umol/kgSW) ",
+        "25 - OHout            (umol/kgSW) ",
+        "26 - PAlkout          (umol/kgSW) ",
+        "27 - SiAlkout         (umol/kgSW) ",
+        "28 - Hfreeout         (umol/kgSW) ", ### Changed "Hfreein" to "Hfreeout", svh20100827
+        "29 - RevelleFactorout ()          ",
+        "30 - OmegaCaout       ()          ",
+        "31 - OmegaArout       ()          ",
+        "32 - xCO2out          (ppm)       ",
+        "33 - pHin (Total)     ()          ",
+        "34 - pHin (SWS)       ()          ",
+        "35 - pHin (Free)      ()          ",
+        "36 - pHin (NBS )      ()          ",
+        "37 - pHout(Total)     ()          ",
+        "38 - pHout(SWS)       ()          ",
+        "39 - pHout(Free)      ()          ",
+        "40 - pHout(NBS )      ()          ",
+        "41 - TEMPIN           (Deg C)     ",
+        "42 - TEMPOUT          (Deg C)     ",
+        "43 - PRESIN           (dbar)      ",
+        "44 - PRESOUT          (dbar)      ",
+        "45 - PAR1TYPE         ()          ",
+        "46 - PAR2TYPE         ()          ",
+        "47 - K1K2CONSTANTS    ()          ",
+        "48 - KSO4CONSTANTS    ()          ",
+        "49 - pHSCALEIN        ()          ",
+        "50 - SAL              (umol/kgSW) ",
+        "51 - PO4              (umol/kgSW) ",
+        "52 - SI               (umol/kgSW) ",
+        "53 - K0input          ()          ",
+        "54 - K1input          ()          ",
+        "55 - K2input          ()          ",
+        "56 - pK1input         ()          ",
+        "57 - pK2input         ()          ",
+        "58 - KWinput          ()          ",
+        "59 - KBinput          ()          ",
+        "60 - KFinput          ()          ",
+        "61 - KSinput          ()          ",
+        "62 - KP1input         ()          ",
+        "63 - KP2input         ()          ",
+        "64 - KP3input         ()          ",
+        "65 - KSiinput         ()          ",
+        "66 - K0output         ()          ",
+        "67 - K1output         ()          ",
+        "68 - K2output         ()          ",
+        "69 - pK1output        ()          ",
+        "70 - pK2output        ()          ",
+        "71 - KWoutput         ()          ",
+        "72 - KBoutput         ()          ",
+        "73 - KFoutput         ()          ",
+        "74 - KSoutput         ()          ",
+        "75 - KP1output        ()          ",
+        "76 - KP2output        ()          ",
+        "77 - KP3output        ()          ",
+        "78 - KSioutput        ()          ",
+        "79 - TB               (umol/kgSW) ",
+        "80 - TF               (umol/kgSW) ",
+        "81 - TS               (umol/kgSW) "]
+
 # return DATA, HEADERS, NICEHEADERS
 
 end # end main function
@@ -652,104 +651,104 @@ end # end main function
 
 
 
-# #**************************************************************************
-# # Subroutines:
-# #**************************************************************************
+#**************************************************************************
+# Subroutines:
+#**************************************************************************
+
+
+
+
+function Constants(TempC,Pdbar)
+global pHScale, WhichKs, WhoseKSO4, sqrSal, Pbar, RT
+global K0, fH, FugFac, VPFac, ntps, TempK, logTempK
+global K1, K2, KW, KB, KF, KS, KP1, KP2, KP3, KSi
+global TB, TF, TS, TP, TSi, RGasConstant, Sal
+
+# SUB Constants, version 04.01, 10-13-97, written by Ernie Lewis.
+# Inputs: pHScale#, WhichKs#, WhoseKSO4#, Sali, TempCi, Pdbar
+# Outputs: K0, K(), T(), fH, FugFac, VPFac
+# This finds the Constants of the CO2 system in seawater or freshwater,
+# corrects them for pressure, and reports them on the chosen pH scale.
+# The process is as follows: the Constants (except KS, KF which stay on the
+# free scale - these are only corrected for pressure) are
+#       1) evaluated as they are given in the literature
+#       2) converted to the SWS scale in mol/kg-SW or to the NBS scale
+#       3) corrected for pressure
+#       4) converted to the SWS pH scale in mol/kg-SW
+#       5) converted to the chosen pH scale
 #
-#
-#
-#
-# function Constants(TempC,Pdbar)
-# global pHScale WhichKs WhoseKSO4 sqrSal Pbar RT;
-# global K0 fH FugFac VPFac ntps TempK logTempK;
-# global K1 K2 KW KB KF KS KP1 KP2 KP3 KSi;
-# global TB TF TS TP TSi RGasConstant Sal;
-#
-# # SUB Constants, version 04.01, 10-13-97, written by Ernie Lewis.
-# # Inputs: pHScale#, WhichKs#, WhoseKSO4#, Sali, TempCi, Pdbar
-# # Outputs: K0, K(), T(), fH, FugFac, VPFac
-# # This finds the Constants of the CO2 system in seawater or freshwater,
-# # corrects them for pressure, and reports them on the chosen pH scale.
-# # The process is as follows: the Constants (except KS, KF which stay on the
-# # free scale - these are only corrected for pressure) are
-# #       1) evaluated as they are given in the literature
-# #       2) converted to the SWS scale in mol/kg-SW or to the NBS scale
-# #       3) corrected for pressure
-# #       4) converted to the SWS pH scale in mol/kg-SW
-# #       5) converted to the chosen pH scale
-# #
-# #       PROGRAMMER'S NOTE: all logs are log base e
-# #       PROGRAMMER'S NOTE: all Constants are converted to the pH scale
-# #               pHScale# (the chosen one) in units of mol/kg-SW
-# #               except KS and KF are on the free scale
-# #               and KW is in units of (mol/kg-SW)^2
-# TempK    = TempC + 273.15;
-# RT       = RGasConstant.*TempK;
-# logTempK = log(TempK);
-# Pbar     = Pdbar ./ 10;
-#
-# # Generate empty vectors for holding results
-# TB = nan[ntps,1];
-# TF = nan[ntps,1];
-# TS = nan[ntps,1];
-#
-# # CalculateTB - Total Borate:
-# F=(WhichKs==8); # Pure water case.
-# if any[F]
-#     TB[F] = 0;
-# end
-# F=(WhichKs==6 | WhichKs==7);
-# if any[F]
-#     TB[F] = 0.0004106.*Sal[F]./35; # in mol/kg-SW
-#     # this is .00001173.*Sali
-#     # this is about 1# lower than Uppstrom's value
-#     # Culkin, F., in Chemical Oceanography,
-#     # ed. Riley and Skirrow, 1965:
-#     # GEOSECS references this, but this value is not explicitly
-#     # given here
-# end
-# F=(WhichKs~=6 & WhichKs~=7 & WhichKs~=8); # All other cases
-# if any[F]
-# 	FF=F&(WhoseKSO4==1|WhoseKSO4==2); # If user opted for Uppstrom's values:
-# 	if any(FF)
-# 	    # Uppstrom, L., Deep-Sea Research 21:161-162, 1974:
-# 	    # this is .000416.*Sali./35. = .0000119.*Sali
-# 		# TB(FF) = (0.000232./10.811).*(Sal(FF)./1.80655); # in mol/kg-SW
-# 	    TB(FF) =  0.0004157.*Sal(FF)./35; # in mol/kg-SW
-# 	end
-# 	FF=F&(WhoseKSO4==3|WhoseKSO4==4); # If user opted for the new Lee values:
-# 	if any(FF)
-# 		# Lee, Kim, Byrne, Millero, Feely, Yong-Ming Liu. 2010.
-# 	 	# Geochimica Et Cosmochimica Acta 74 (6): 1801–1811.
-# 		TB(FF) =  0.0004326.*Sal(FF)./35; # in mol/kg-SW
-# 	end
-# end
-#
-# # CalculateTF;
-# # Riley, J. P., Deep-Sea Research 12:219-220, 1965:
-# # this is .000068.*Sali./35. = .00000195.*Sali
-# TF = (0.000067./18.998).*(Sal./1.80655); # in mol/kg-SW
-#
-# # CalculateTS ;
-# # Morris, A. W., and Riley, J. P., Deep-Sea Research 13:699-705, 1966:
-# # this is .02824.*Sali./35. = .0008067.*Sali
-# TS = (0.14./96.062).*(Sal./1.80655); # in mol/kg-SW
-#
-# # CalculateK0:
-# # Weiss, R. F., Marine Chemistry 2:203-215, 1974.
-# TempK100  = TempK./100;
-# lnK0 = -60.2409 + 93.4517 ./ TempK100 + 23.3585 .* log(TempK100) + Sal .*
-#     (0.023517 - 0.023656 .* TempK100 + 0.0047036 .* TempK100 .^2);
-# K0   = exp(lnK0);                  # this is in mol/kg-SW/atm
-#
-# # CalculateIonS:
-# # This is from the DOE handbook, Chapter 5, p. 13/22, eq. 7.2.4:
-# IonS         = 19.924 .* Sal ./ (1000 - 1.005   .* Sal);
-#
+#       PROGRAMMER'S NOTE: all logs are log base e
+#       PROGRAMMER'S NOTE: all Constants are converted to the pH scale
+#               pHScale# (the chosen one) in units of mol/kg-SW
+#               except KS and KF are on the free scale
+#               and KW is in units of (mol/kg-SW)^2
+TempK    = TempC .+ 273.15
+RT       = RGasConstant * TempK
+logTempK = log.(TempK)
+Pbar     = Pdbar / 10
+
+# Generate empty vectors for holding results
+TB = fill(NaN,ntps)
+TF = fill(NaN,ntps)
+TS = fill(NaN,ntps)
+
+# CalculateTB - Total Borate:
+F = WhichKs .== 8 # Pure water case.
+if any(F)
+    TB[F] .= 0.0
+end
+F = @. (WhichKs == 6) | (WhichKs == 7)
+if any(F)
+    TB[F] = 0.0004106 * Sal[F] / 35 # in mol/kg-SW
+    # this is .00001173.*Sali
+    # this is about 1# lower than Uppstrom's value
+    # Culkin, F., in Chemical Oceanography,
+    # ed. Riley and Skirrow, 1965:
+    # GEOSECS references this, but this value is not explicitly
+    # given here
+end
+F = @. (WhichKs != 6) & (WhichKs != 7) & (WhichKs != 8) # All other cases
+if any(F)
+	FF = @. F & ((WhoseKSO4 == 1) | (WhoseKSO4 == 2)) # If user opted for Uppstrom's values:
+	if any(FF)
+	    # Uppstrom, L., Deep-Sea Research 21:161-162, 1974:
+	    # this is .000416.*Sali./35. = .0000119.*Sali
+		# TB[FF] = (0.000232./10.811).*(Sal[FF]./1.80655); # in mol/kg-SW
+	    TB[FF] = 0.0004157 * Sal[FF] / 35 # in mol/kg-SW
+	end
+	FF = @. F & ((WhoseKSO4 == 3) | (WhoseKSO4 == 4)) # If user opted for the new Lee values:
+	if any(FF)
+		# Lee, Kim, Byrne, Millero, Feely, Yong-Ming Liu. 2010.
+	 	# Geochimica Et Cosmochimica Acta 74 (6): 1801–1811.
+		TB[FF] = 0.0004326 * Sal[FF] / 35 # in mol/kg-SW
+	end
+end
+
+# CalculateTF;
+# Riley, J. P., Deep-Sea Research 12:219-220, 1965:
+# this is .000068.*Sali./35. = .00000195.*Sali
+TF = (0.000067 / 18.998) * Sal / 1.80655 # in mol/kg-SW
+
+# CalculateTS ;
+# Morris, A. W., and Riley, J. P., Deep-Sea Research 13:699-705, 1966:
+# this is .02824.*Sali./35. = .0008067.*Sali
+TS = (0.14 / 96.062) * Sal / 1.80655 # in mol/kg-SW
+
+# CalculateK0:
+# Weiss, R. F., Marine Chemistry 2:203-215, 1974.
+TempK100  = TempK / 100
+lnK0 = @. -60.2409 + 93.4517 / TempK100 + 23.3585 * log(TempK100) + Sal *
+    (0.023517 - 0.023656TempK100 + 0.0047036TempK100^2);
+K0 = exp.(lnK0)                  # this is in mol/kg-SW/atm
+
+# CalculateIonS:
+# This is from the DOE handbook, Chapter 5, p. 13/22, eq. 7.2.4:
+IonS = @. 19.924Sal / (1000 - 1.005Sal)
+
 # # CalculateKS:
-# lnKS = nan[ntps,1]; pKS  = nan[ntps,1]; KS   = nan[ntps,1];
+# lnKS = fill(NaN,ntps); pKS  = fill(NaN,ntps); KS   = fill(NaN,ntps);
 # F=(WhoseKSO4==1|WhoseKSO4==3);
-# if any[F]
+# if any(F)
 #     # Dickson, A. G., J. Chemical Thermodynamics, 22:113-127, 1990
 #     # The goodness of fit is .021.
 #     # It was given in mol/kg-H2O. I convert it to mol/kg-SW.
@@ -763,7 +762,7 @@ end # end main function
 #         .* (1 - 0.001005 .* Sal[F]);   # convert to mol/kg-SW
 # end
 # F=(WhoseKSO4==2|WhoseKSO4==4);
-# if any[F]
+# if any(F)
 #     # Khoo, et al, Analytical Chemistry, 49(1):29-34, 1977
 #     # KS was found by titrations with a hydrogen electrode
 #     # of artificial seawater containing sulfate (but without F)
@@ -797,14 +796,14 @@ end # end main function
 # FREEtoTOT =  1 + TS./KS;
 #
 # # CalculatefH
-# fH = nan[ntps,1];
+# fH = fill(NaN,ntps);
 # # Use GEOSECS's value for cases 1,2,3,4,5 (and 6) to convert pH scales.
 # F=(WhichKs==8);
-# if any[F]
+# if any(F)
 #     fH[F] = 1; # this shouldn't occur in the program for this case
 # end
 # F=(WhichKs==7);
-# if any[F]
+# if any(F)
 #     fH[F] = 1.29 - 0.00204.*  TempK[F] + (0.00046 -
 #         0.00000148.*TempK[F]).*Sal[F].*Sal[F];
 #     # Peng et al, Tellus 39B:439-458, 1987:
@@ -813,7 +812,7 @@ end # end main function
 #     # doesn't agree with the check value they give on p. 456.
 # end
 # F=(WhichKs~=7 & WhichKs~=8);
-# if any[F]
+# if any(F)
 #     fH[F] = 1.2948 - 0.002036.*TempK[F] + (0.0004607 -
 #         0.000001475.*TempK[F]).*Sal[F].^2;
 #     # Takahashi et al, Chapter 3 in GEOSECS Pacific Expedition,
@@ -821,14 +820,14 @@ end # end main function
 # end
 #
 # # CalculateKB:
-# KB      = nan[ntps,1]; logKB   = nan[ntps,1];
-# lnKBtop = nan[ntps,1]; lnKB    = nan[ntps,1];
+# KB      = fill(NaN,ntps); logKB   = fill(NaN,ntps);
+# lnKBtop = fill(NaN,ntps); lnKB    = fill(NaN,ntps);
 # F=(WhichKs==8); # Pure water case
-# if any[F]
+# if any(F)
 #     KB[F] = 0;
 # end
 # F=(WhichKs==6 | WhichKs==7);
-# if any[F]
+# if any(F)
 #     # This is for GEOSECS and Peng et al.
 #     # Lyman, John, UCLA Thesis, 1957
 #     # fit by Li et al, JGR 74:5507-5525, 1969:
@@ -837,7 +836,7 @@ end # end main function
 #         ./fH[F];               # convert to the SWS scale
 # end
 # F=(WhichKs~=6 & WhichKs~=7 & WhichKs~=8);
-# if any[F]
+# if any(F)
 #     # Dickson, A. G., Deep-Sea Research 37:755-766, 1990:
 #     lnKBtop[F] = -8966.9 - 2890.53.*sqrSal[F] - 77.942.*Sal[F] +
 #         1.728.*sqrSal[F].*Sal[F] - 0.0996.*Sal[F].^2;
@@ -849,23 +848,23 @@ end # end main function
 # end
 #
 # # CalculateKW:
-# lnKW = nan[ntps,1]; KW = nan[ntps,1];
+# lnKW = fill(NaN,ntps); KW = fill(NaN,ntps);
 # F=(WhichKs==7);
-# if any[F]
+# if any(F)
 #     # Millero, Geochemica et Cosmochemica Acta 43:1651-1661, 1979
 #     lnKW[F] = 148.9802 - 13847.26./TempK[F] - 23.6521.*logTempK[F] +
 #         (-79.2447 + 3298.72./TempK[F] + 12.0408.*logTempK[F]).*
 #         sqrSal[F] - 0.019813.*Sal[F];
 # end
 # F=(WhichKs==8);
-# if any[F]
+# if any(F)
 #     # Millero, Geochemica et Cosmochemica Acta 43:1651-1661, 1979
 #     # refit data of Harned and Owen, The Physical Chemistry of
 #     # Electrolyte Solutions, 1958
 #     lnKW[F] = 148.9802 - 13847.26./TempK[F] - 23.6521.*logTempK[F];
 # end
 # F=(WhichKs~=6 & WhichKs~=7 & WhichKs~=8);
-# if any[F]
+# if any(F)
 #     # Millero, Geochemica et Cosmochemica Acta 59:661-677, 1995.
 #     # his check value of 1.6 umol/kg-SW should be 6.2
 #     lnKW[F] = 148.9802 - 13847.26./TempK[F] - 23.6521.*logTempK[F] +
@@ -874,17 +873,17 @@ end # end main function
 # end
 # KW = exp(lnKW); # this is on the SWS pH scale in (mol/kg-SW)^2
 # F=(WhichKs==6);
-# if any[F]
+# if any(F)
 #     KW[F] = 0; # GEOSECS doesn't include OH effects
 # end
 #
 # # CalculateKP1KP2KP3KSi:
-# KP1      = nan[ntps,1]; KP2      = nan[ntps,1];
-# KP3      = nan[ntps,1]; KSi      = nan[ntps,1];
-# lnKP1    = nan[ntps,1]; lnKP2    = nan[ntps,1];
-# lnKP3    = nan[ntps,1]; lnKSi    = nan[ntps,1];
+# KP1      = fill(NaN,ntps); KP2      = fill(NaN,ntps);
+# KP3      = fill(NaN,ntps); KSi      = fill(NaN,ntps);
+# lnKP1    = fill(NaN,ntps); lnKP2    = fill(NaN,ntps);
+# lnKP3    = fill(NaN,ntps); lnKSi    = fill(NaN,ntps);
 # F=(WhichKs==7);
-# if any[F]
+# if any(F)
 #     KP1[F] = 0.02;
 #     # Peng et al don't include the contribution from this term,
 #     # but it is so small it doesn't contribute. It needs to be
@@ -902,13 +901,13 @@ end # end main function
 #         ./fH[F];                          # convert to SWS scale
 # end
 # F=(WhichKs==6 | WhichKs==8);
-# if any[F]
+# if any(F)
 #     KP1[F] = 0; KP2[F] = 0; KP3[F] = 0; KSi[F] = 0;
 #     # Neither the GEOSECS choice nor the freshwater choice
 #     # include contributions from phosphate or silicate.
 # end
 # F=(WhichKs~=6 & WhichKs~=7 & WhichKs~=8);
-# if any[F]
+# if any(F)
 #     # Yao and Millero, Aquatic Geochemistry 1:53-88, 1995
 #     # KP1, KP2, KP3 are on the SWS pH scale in mol/kg-SW.
 #     # KSi was given on the SWS pH scale in molal units.
@@ -929,12 +928,12 @@ end # end main function
 # end
 #
 # # CalculateK1K2:
-# logK1    = nan[ntps,1]; lnK1     = nan[ntps,1];
-# pK1      = nan[ntps,1]; K1       = nan[ntps,1];
-# logK2    = nan[ntps,1]; lnK2     = nan[ntps,1];
-# pK2      = nan[ntps,1]; K2       = nan[ntps,1];
+# logK1    = fill(NaN,ntps); lnK1     = fill(NaN,ntps);
+# pK1      = fill(NaN,ntps); K1       = fill(NaN,ntps);
+# logK2    = fill(NaN,ntps); lnK2     = fill(NaN,ntps);
+# pK2      = fill(NaN,ntps); K2       = fill(NaN,ntps);
 # F=(WhichKs==1);
-# if any[F]
+# if any(F)
 #     # ROY et al, Marine Chemistry, 44:249-267, 1993
 #     # (see also: Erratum, Marine Chemistry 45:337, 1994
 #     # and Erratum, Marine Chemistry 52:183, 1996)
@@ -964,7 +963,7 @@ end # end main function
 #         ./SWStoTOT[F];                 # convert to SWS pH scale
 # end
 # F=(WhichKs==2);
-# if any[F]
+# if any(F)
 #     # GOYET AND POISSON, Deep-Sea Research, 36(11):1635-1654, 1989
 #     # The 2s precision in pK1 is .011, or 2.5# in K1.
 #     # The 2s precision in pK2 is .02, or 4.5# in K2.
@@ -978,7 +977,7 @@ end # end main function
 #     K2[F] = 10.^(-pK2[F]); # this is on the SWS pH scale in mol/kg-SW
 # end
 # F=(WhichKs==3);
-# if any[F]
+# if any(F)
 #     # HANSSON refit BY DICKSON AND MILLERO
 #     # Dickson and Millero, Deep-Sea Research, 34(10):1733-1743, 1987
 #     # (see also Corrigenda, Deep-Sea Research, 36:983, 1989)
@@ -1001,7 +1000,7 @@ end # end main function
 #     K2[F] = 10.^(-pK2[F]); # this is on the SWS pH scale in mol/kg-SW
 # end
 # F=(WhichKs==4);
-# if any[F]
+# if any(F)
 #     # MEHRBACH refit BY DICKSON AND MILLERO
 #     # Dickson and Millero, Deep-Sea Research, 34(10):1733-1743, 1987
 #     # (see also Corrigenda, Deep-Sea Research, 36:983, 1989)
@@ -1020,7 +1019,7 @@ end # end main function
 #     K2[F] = 10.^(-pK2[F]); # this is on the SWS pH scale in mol/kg-SW
 # end
 # F=(WhichKs==5);
-# if any[F]
+# if any(F)
 #     # HANSSON and MEHRBACH refit BY DICKSON AND MILLERO
 #     # Dickson and Millero, Deep-Sea Research,34(10):1733-1743, 1987
 #     # (see also Corrigenda, Deep-Sea Research, 36:983, 1989)
@@ -1041,7 +1040,7 @@ end # end main function
 #     K2[F] = 10.^(-pK2[F]); # this is on the SWS pH scale in mol/kg-SW
 # end
 # F=(WhichKs==6 | WhichKs==7);
-# if any[F]
+# if any(F)
 #     # GEOSECS and Peng et al use K1, K2 from Mehrbach et al,
 #     # Limnology and Oceanography, 18(6):897-907, 1973.
 # 	# I.e., these are the original Mehrbach dissociation constants.
@@ -1058,7 +1057,7 @@ end # end main function
 #         ./fH[F];                     # convert to SWS scale
 # end
 # F=(WhichKs==8);
-# if any[F]
+# if any(F)
 # 	# PURE WATER CASE
 #     # Millero, F. J., Geochemica et Cosmochemica Acta 43:1651-1661, 1979:
 #     # K1 from refit data from Harned and Davis,
@@ -1073,7 +1072,7 @@ end # end main function
 #     K2[F] = exp(lnK2[F]);
 # end
 # F=(WhichKs==9);
-# if any[F]
+# if any(F)
 #     # From Cai and Wang 1998, for estuarine use.
 # 	# Data used in this work is from:
 # 	# K1: Merhback (1973) for S>15, for S<15: Mook and Keone (1975)
@@ -1093,7 +1092,7 @@ end # end main function
 #         ./fH[F];                    # convert to SWS scale (uncertain at low Sal due to junction potential);
 # end
 # F=(WhichKs==10);
-# if any[F]
+# if any(F)
 #     # From Lueker, Dickson, Keeling, 2000
 # 	# This is Mehrbach's data refit after conversion to the total scale, for comparison with their equilibrator work.
 #     # Mar. Chem. 70 (2000) 105-119
@@ -1106,7 +1105,7 @@ end # end main function
 #         ./SWStoTOT[F];                # convert to SWS pH scale
 # end
 # F=(WhichKs==11);
-# if any[F]
+# if any(F)
 # 	# Mojica Prieto and Millero 2002. Geochim. et Cosmochim. Acta. 66(14) 2529-2540.
 # 	# sigma for pK1 is reported to be 0.0056
 # 	# sigma for pK2 is reported to be 0.010
@@ -1118,7 +1117,7 @@ end # end main function
 # 	K2[F] = 10.^-pK2; # this is on the SWS pH scale in mol/kg-SW
 # end
 # F=(WhichKs==12);
-# if any[F]
+# if any(F)
 # 	# Millero et al., 2002. Deep-Sea Res. I (49) 1705-1723.
 # 	# Calculated from overdetermined WOCE-era field measurements
 # 	# sigma for pK1 is reported to be 0.005
@@ -1130,7 +1129,7 @@ end # end main function
 # 	K2[F] = 10.^-pK2; # this is on the SWS pH scale in mol/kg-SW
 # end
 # F=(WhichKs==13);
-# if any[F]
+# if any(F)
 #     # From Millero 2006 work on pK1 and pK2 from titrations
 # 	# Millero, Graham, Huang, Bustos-Serrano, Pierrot. Mar.Chem. 100 (2006) 80-94.
 #     # S=1 to 50, T=0 to 50. On seawater scale (SWS). From titrations in Gulf Stream seawater.
@@ -1148,7 +1147,7 @@ end # end main function
 #     K2[F] = 10.^-(pK2[F]);
 # end
 # F=(WhichKs==14);
-# if any[F]
+# if any(F)
 #     # From Millero, 2010, also for estuarine use.
 # 	# Marine and Freshwater Research, v. 61, p. 139–142.
 # 	# Fits through compilation of real seawater titration results:
@@ -1173,7 +1172,7 @@ end # end main function
 # end
 # F=(WhichKs==15);
 # # Added by J. C. Orr on 4 Dec 2016
-# if any[F]
+# if any(F)
 #     # From Waters, Millero, Woosley 2014
 # 	# Mar. Chem., 165, 66-67, 2014
 #         # Corrigendum to “The free proton concentration scale for seawater pH”.
@@ -1264,11 +1263,11 @@ end # end main function
 # #****************************************************************************
 #
 # #CorrectK1K2KBForPressure:
-# deltaV    = nan[ntps,1]; Kappa     = nan[ntps,1];
-# lnK1fac   = nan[ntps,1]; lnK2fac   = nan[ntps,1];
-# lnKBfac   = nan[ntps,1];
+# deltaV    = fill(NaN,ntps); Kappa     = fill(NaN,ntps);
+# lnK1fac   = fill(NaN,ntps); lnK2fac   = fill(NaN,ntps);
+# lnKBfac   = fill(NaN,ntps);
 # F=(WhichKs==8);
-# if any[F]
+# if any(F)
 #     #***PressureEffectsOnK1inFreshWater:
 #     #               This is from Millero, 1983.
 #     deltaV[F]  = -30.54 + 0.1849 .*TempC[F] - 0.0023366.*TempC[F].^2;
@@ -1282,7 +1281,7 @@ end # end main function
 #     lnKBfac[F] = 0 ;#; this doesn't matter since TB = 0 for this case
 # end
 # F=(WhichKs==6 | WhichKs==7);
-# if any[F]
+# if any(F)
 #     #               GEOSECS Pressure Effects On K1, K2, KB (on the NBS scale)
 #     #               Takahashi et al, GEOSECS Pacific Expedition v. 3, 1982 quotes
 #     #               Culberson and Pytkowicz, L and O 13:403-417, 1968:
@@ -1296,7 +1295,7 @@ end # end main function
 #     lnKBfac[F] = (27.5 - 0.095.*TempC[F]).*Pbar[F]./RT[F];
 # end
 # F=(WhichKs~=6 & WhichKs~=7 & WhichKs~=8);
-# if any[F]
+# if any(F)
 #     #***PressureEffectsOnK1:
 #     #               These are from Millero, 1995.
 #     #               They are the same as Millero, 1979 and Millero, 1992.
@@ -1340,9 +1339,9 @@ end # end main function
 # end
 #
 # # CorrectKWForPressure:
-# lnKWfac   = nan[ntps,1];
+# lnKWfac   = fill(NaN,ntps);
 # F=(WhichKs==8);
-# if any[F]
+# if any(F)
 #     # PressureEffectsOnKWinFreshWater:
 #     #               This is from Millero, 1983.
 #     deltaV[F]  =  -25.6 + 0.2324.*TempC[F] - 0.0036246.*TempC[F].^2;
@@ -1353,7 +1352,7 @@ end # end main function
 #     #               for fresh water in Millero, 1983 are the same.
 # end
 # F=(WhichKs~=8);
-# if any[F]
+# if any(F)
 #     # GEOSECS doesn't include OH term, so this won't matter.
 #     # Peng et al didn't include pressure, but here I assume that the KW correction
 #     #       is the same as for the other seawater cases.
@@ -1429,7 +1428,7 @@ end # end main function
 #
 # # FindpHScaleConversionFactor:
 # # this is the scale they will be put on
-# pHfactor  = nan[ntps,1];
+# pHfactor  = fill(NaN,ntps);
 # F=(pHScale==1); #Total
 # pHfactor[F] = SWStoTOT[F];
 # F=(pHScale==2); #SWS, they are all on this now
@@ -1480,9 +1479,9 @@ end # end main function
 # VPCorrWP = exp(-0.000544.*Sal);
 # VPSWWP = VPWP.*VPCorrWP;
 # VPFac = 1 - VPSWWP; # this assumes 1 atmosphere
-# end # end nested function
-#
-#
+end # end nested function
+
+
 # function varargout=CalculatepHfCO2fromTATC(TAx, TCx)
 # global FugFac F;
 # # Outputs pH fCO2, in that order
@@ -1546,7 +1545,7 @@ end # end main function
 #     deltapH   = Residual./Slope; # this is Newton's method
 #     # to keep the jump from being too big;
 #     while any(abs(deltapH) > 1)
-#         FF=abs(deltapH)>1; deltapH(FF)=deltapH(FF)./2;
+#         FF=abs(deltapH)>1; deltapH[FF]=deltapH[FF]./2;
 #     end
 #     pHx       = pHx + deltapH; # Is on the same scale as K1 and K2 were calculated
 # end
@@ -1641,7 +1640,7 @@ end # end main function
 #     deltapH   = Residual./Slope; #' this is Newton's method
 #     # ' to keep the jump from being too big:
 #     while any(abs(deltapH) > 1)
-#         FF=abs(deltapH)>1; deltapH(FF)=deltapH(FF)./2;
+#         FF=abs(deltapH)>1; deltapH[FF]=deltapH[FF]./2;
 #     end
 #     pH = pH + deltapH;
 # end
@@ -1806,12 +1805,12 @@ end # end main function
 # # '       boric acid, and the pHi of seawater, Limnology and Oceanography
 # # '       13:403-417, 1968.
 # # '***********************************************************************
-# Ca=nan[ntps,1];
-# Ar=nan[ntps,1];
-# KCa=nan[ntps,1];
-# KAr=nan[ntps,1];
+# Ca=fill(NaN,ntps);
+# Ar=fill(NaN,ntps);
+# KCa=fill(NaN,ntps);
+# KAr=fill(NaN,ntps);
 # F=(WhichKs~=6 & WhichKs~=7);
-# if any[F]
+# if any(F)
 # # (below here, F isn't used, since almost always all rows match the above criterium,
 # #  in all other cases the rows will be overwritten later on).
 #     # CalculateCa:
@@ -1852,7 +1851,7 @@ end # end main function
 #     KAr       = KAr.*exp(lnKArfac);
 # end
 # F=(WhichKs==6 | WhichKs==7);
-# if any[F]
+# if any(F)
 #     #
 #     # *** CalculateCaforGEOSECS:
 #     # Culkin, F, in Chemical Oceanography, ed. Riley and Skirrow, 1965:
@@ -1915,7 +1914,7 @@ end # end main function
 # #  KS = K(6); KF = K(5);# 'these are at the given T, S, P
 # FREEtoTOT = (1 + TS./KS);# ' pH scale conversion factor
 # SWStoTOT  = (1 + TS./KS)./(1 + TS./KS + TF./KF);# ' pH scale conversion factor
-# factor=nan[ntps,1];
+# factor=fill(NaN,ntps);
 # F=pHScale==1;  #'"pHtot"
 # factor[F] = 0;
 # F=pHScale==2; # '"pHsws"
