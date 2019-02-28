@@ -483,19 +483,19 @@ PAlkinp                += PengCorrection
 CO2inp                  = @. TCc - CO3inp - HCO3inp
 F = fill(true,ntps)           # i.e., do for all samples:
 Revelleinp              = RevelleFactor(TAc .- PengCorrection, TCc)
-println(Revelleinp)
-# [OmegaCainp OmegaArinp] = CaSolubility(Sal, TempCi, Pdbari, TCc, PHic);
-# xCO2dryinp              = PCic./VPFac; # ' this assumes pTot = 1 atm
 
-# # Just for reference, convert pH at input conditions to the other scales, too.
-# [pHicT pHicS pHicF pHicN]=FindpHOnAllScales(PHic);
-#
-# # Merge the Ks at input into an array. Ks at output will be glued to this later.
-# KIVEC=[K0 K1 K2 -log10(K1) -log10(K2) KW KB KF KS KP1 KP2 KP3 KSi];
-#
-# # Calculate the constants for all samples at output conditions
-# Constants(TempCo,Pdbaro);
-#
+OmegaCainp, OmegaArinp = CaSolubility(Sal, TempCi, Pdbari, TCc, PHic)
+xCO2dryinp              = PCic ./ VPFac # ' this assumes pTot = 1 atm
+
+# Just for reference, convert pH at input conditions to the other scales, too.
+pHicT, pHicS, pHicF, pHicN = FindpHOnAllScales(PHic)
+
+# Merge the Ks at input into an array. Ks at output will be glued to this later.
+KIVEC = hcat(K0, K1, K2, -log10.(K1), -log10.(K2), KW, KB, KF, KS, KP1, KP2, KP3, KSi)
+
+# Calculate the constants for all samples at output conditions
+Constants(TempCo,Pdbaro)
+
 # # Added by JM Epitalon
 # # For computing derivative with respect to Ks, one has to perturb the value of one K
 # # Requested perturbation is passed through global variables PertK and Perturb
@@ -515,42 +515,43 @@ println(Revelleinp)
 #             TB = TB + Perturb;
 #     end
 # end
-#
-#
-# # Calculate, for output conditions, using conservative TA and TC, pH, fCO2 and pCO2
-# F=true[ntps,1]; # i.e., do for all samples:
-# [PHoc FCoc] = CalculatepHfCO2fromTATC(TAc-PengCorrection, TCc);
-# PCoc = FCoc./FugFac;
-#
-# # Calculate Other Stuff At Output Conditions:
-# [HCO3out CO3out BAlkout
-#     OHout PAlkout
-#     SiAlkout Hfreeout
-#     HSO4out HFout]      = CalculateAlkParts(PHoc, TCc);
-# PAlkout                 = PAlkout+PengCorrection;
-# CO2out                  = TCc - CO3out - HCO3out;
-# Revelleout              = RevelleFactor(TAc, TCc);
-# [OmegaCaout OmegaArout] = CaSolubility(Sal, TempCo, Pdbaro, TCc, PHoc);
-# xCO2dryout              = PCoc./VPFac; # ' this assumes pTot = 1 atm
-#
-# # Just for reference, convert pH at output conditions to the other scales, too.
-# [pHocT pHocS pHocF pHocN]=FindpHOnAllScales(PHoc);
-#
-# KOVEC=[K0 K1 K2 -log10(K1) -log10(K2) KW KB KF KS KP1 KP2 KP3 KSi];
-# TVEC =[TB TF TS];
-#
-# # Saving data in array, 81 columns, as many rows as samples input
-# DATA=[TAc*1e6        TCc*1e6         PHic           PCic*1e6        FCic*1e6
-#       HCO3inp*1e6    CO3inp*1e6      CO2inp*1e6     BAlkinp*1e6     OHinp*1e6
-#       PAlkinp*1e6    SiAlkinp*1e6    Hfreeinp*1e6   Revelleinp      OmegaCainp ### Multiplied Hfreeinp *1e6, svh20100827
-#       OmegaArinp     xCO2dryinp*1e6  PHoc           PCoc*1e6        FCoc*1e6
-#       HCO3out*1e6    CO3out*1e6      CO2out*1e6     BAlkout*1e6     OHout*1e6
-#       PAlkout*1e6    SiAlkout*1e6    Hfreeout*1e6   Revelleout      OmegaCaout ### Multiplied Hfreeout *1e6, svh20100827
-#       OmegaArout     xCO2dryout*1e6  pHicT          pHicS           pHicF
-#       pHicN          pHocT           pHocS          pHocF           pHocN
-#       TEMPIN         TEMPOUT         PRESIN         PRESOUT         PAR1TYPE
-#       PAR2TYPE       K1K2CONSTANTS   KSO4CONSTANTS  pHSCALEIN       SAL
-#       PO4            SI              KIVEC          KOVEC           TVEC*1e6]
+
+
+# Calculate, for output conditions, using conservative TA and TC, pH, fCO2 and pCO2
+F = fill(true,ntps) # i.e., do for all samples:
+PHoc, FCoc = CalculatepHfCO2fromTATC(TAc .- PengCorrection, TCc)
+PCoc = FCoc ./ FugFac
+
+# Calculate Other Stuff At Output Conditions:
+HCO3out, CO3out, BAlkout,
+    OHout, PAlkout,
+    SiAlkout, Hfreeout,
+    HSO4out, HFout      = CalculateAlkParts(PHoc, TCc)
+PAlkout                += PengCorrection
+CO2out                  = @. TCc - CO3out - HCO3out
+Revelleout              = RevelleFactor(TAc, TCc)
+OmegaCaout, OmegaArout = CaSolubility(Sal, TempCo, Pdbaro, TCc, PHoc)
+xCO2dryout              = PCoc ./ VPFac # ' this assumes pTot = 1 atm
+
+# Just for reference, convert pH at output conditions to the other scales, too.
+pHocT, pHocS, pHocF, pHocN = FindpHOnAllScales(PHoc)
+
+KOVEC = hcat(K0, K1, K2, -log10.(K1), -log10.(K2), KW, KB, KF, KS, KP1, KP2, KP3, KSi)
+TVEC = hcat(TB, TF, TS)
+
+# Saving data in array, 81 columns, as many rows as samples input
+DATA= hcat(
+      TAc*1e6      ,  TCc*1e6        , PHic          , PCic*1e6       , FCic*1e6   ,
+      HCO3inp*1e6  ,  CO3inp*1e6     , CO2inp*1e6    , BAlkinp*1e6    , OHinp*1e6  ,
+      PAlkinp*1e6  ,  SiAlkinp*1e6   , Hfreeinp*1e6  , Revelleinp     , OmegaCainp , ### Multiplied Hfreeinp *1e6, svh20100827
+      OmegaArinp   ,  xCO2dryinp*1e6 , PHoc          , PCoc*1e6       , FCoc*1e6   ,
+      HCO3out*1e6  ,  CO3out*1e6     , CO2out*1e6    , BAlkout*1e6    , OHout*1e6  ,
+      PAlkout*1e6  ,  SiAlkout*1e6   , Hfreeout*1e6  , Revelleout     , OmegaCaout , ### Multiplied Hfreeout *1e6, svh20100827
+      OmegaArout   ,  xCO2dryout*1e6 , pHicT         , pHicS          , pHicF      ,
+      pHicN        ,  pHocT          , pHocS         , pHocF          , pHocN      ,
+      TEMPIN       ,  TEMPOUT        , PRESIN        , PRESOUT        , PAR1TYPE   ,
+      PAR2TYPE     ,  K1K2CONSTANTS  , KSO4CONSTANTS , pHSCALEIN      , SAL        ,
+      PO4          ,  SI             , KIVEC         , KOVEC          , TVEC*1e6   )
 
 HEADERS = ["TAlk","TCO2","pHin","pCO2in","fCO2in","HCO3in","CO3in",
     "CO2in","BAlkin","OHin","PAlkin","SiAlkin","Hfreein","RFin",
@@ -649,7 +650,7 @@ HEADERS = ["TAlk","TCO2","pHin","pCO2in","fCO2in","HCO3in","CO3in",
         "80 - TF               (umol/kgSW) ",
         "81 - TS               (umol/kgSW) "]
 
-# return DATA, HEADERS, NICEHEADERS
+return DATA, HEADERS, NICEHEADERS
 
 end # end main function
 
@@ -1787,115 +1788,115 @@ return HCO3, CO3, BAlk, OH, PAlk, SiAlk, Hfree, HSO4, HF
 end # end nested function
 
 
-# function CaSolubility(Sal, TempC, Pdbar, TC, pH)
-# global K1 K2 TempK logTempK sqrSal Pbar RT WhichKs ntps
+function CaSolubility(Sal, TempC, Pdbar, TC, pH)
+global K1, K2, TempK, logTempK, sqrSal, Pbar, RT, WhichKs, ntps
 # global PertK    # Id of perturbed K
 # global Perturb  # perturbation
-# # '***********************************************************************
-# # ' SUB CaSolubility, version 01.05, 05-23-97, written by Ernie Lewis.
-# # ' Inputs: WhichKs#, Sal, TempCi, Pdbari, TCi, pHi, K1, K2
-# # ' Outputs: OmegaCa, OmegaAr
-# # ' This calculates omega, the solubility ratio, for calcite and aragonite.
-# # ' This is defined by: Omega = [CO3--]*[Ca++]./Ksp,
-# # '       where Ksp is the solubility product (either KCa or KAr).
-# # '***********************************************************************
-# # ' These are from:
-# # ' Mucci, Alphonso, The solubility of calcite and aragonite in seawater
-# # '       at various salinities, temperatures, and one atmosphere total
-# # '       pressure, American Journal of Science 283:781-799, 1983.
-# # ' Ingle, S. E., Solubility of calcite in the ocean,
-# # '       Marine Chemistry 3:301-319, 1975,
-# # ' Millero, Frank, The thermodynamics of the carbonate system in seawater,
-# # '       Geochemica et Cosmochemica Acta 43:1651-1661, 1979.
-# # ' Ingle et al, The solubility of calcite in seawater at atmospheric pressure
-# # '       and 35#o salinity, Marine Chemistry 1:295-307, 1973.
-# # ' Berner, R. A., The solubility of calcite and aragonite in seawater in
-# # '       atmospheric pressure and 34.5#o salinity, American Journal of
-# # '       Science 276:713-730, 1976.
-# # ' Takahashi et al, in GEOSECS Pacific Expedition, v. 3, 1982.
-# # ' Culberson, C. H. and Pytkowicz, R. M., Effect of pressure on carbonic acid,
-# # '       boric acid, and the pHi of seawater, Limnology and Oceanography
-# # '       13:403-417, 1968.
-# # '***********************************************************************
-# Ca=fill(NaN,ntps);
-# Ar=fill(NaN,ntps);
-# KCa=fill(NaN,ntps);
-# KAr=fill(NaN,ntps);
-# F=(WhichKs!=6 & WhichKs!=7);
-# if any(F)
-# # (below here, F isn't used, since almost always all rows match the above criterium,
-# #  in all other cases the rows will be overwritten later on).
-#     # CalculateCa:
-#     # '       Riley, J. P. and Tongudai, M., Chemical Geology 2:263-269, 1967:
-#     # '       this is .010285.*Sali./35
-#     Ca = 0.02128./40.087.*(Sal./1.80655);# ' in mol/kg-SW
-#     # CalciteSolubility:
-#     # '       Mucci, Alphonso, Amer. J. of Science 283:781-799, 1983.
-#     logKCa = -171.9065 - 0.077993.*TempK + 2839.319./TempK;
-#     logKCa = logKCa + 71.595.*logTempK./log(10);
-#     logKCa = logKCa + (-0.77712 + 0.0028426.*TempK + 178.34./TempK).*sqrSal;
-#     logKCa = logKCa - 0.07711.*Sal + 0.0041249.*sqrSal.*Sal;
-#     # '       sd fit = .01 (for Sal part, not part independent of Sal)
-#     KCa = 10.^(logKCa);# ' this is in (mol/kg-SW)^2
-#     # AragoniteSolubility:
-#     # '       Mucci, Alphonso, Amer. J. of Science 283:781-799, 1983.
-#     logKAr = -171.945 - 0.077993.*TempK + 2903.293./TempK;
-#     logKAr = logKAr + 71.595.*logTempK./log(10);
-#     logKAr = logKAr + (-0.068393 + 0.0017276.*TempK + 88.135./TempK).*sqrSal;
-#     logKAr = logKAr - 0.10018.*Sal + 0.0059415.*sqrSal.*Sal;
-#     # '       sd fit = .009 (for Sal part, not part independent of Sal)
-#     KAr    = 10.^(logKAr);# ' this is in (mol/kg-SW)^2
-#     # PressureCorrectionForCalcite:
-#     # '       Ingle, Marine Chemistry 3:301-319, 1975
-#     # '       same as in Millero, GCA 43:1651-1661, 1979, but Millero, GCA 1995
-#     # '       has typos (-.5304, -.3692, and 10^3 for Kappa factor)
-#     deltaVKCa = -48.76 + 0.5304.*TempC;
-#     KappaKCa  = (-11.76 + 0.3692.*TempC) / 1000
-#     lnKCafac  = (-deltaVKCa + 0.5.*KappaKCa.*Pbar) *Pbar / RT
-#     KCa       = KCa.*exp(lnKCafac);
-#     # PressureCorrectionForAragonite:
-#     # '       Millero, Geochemica et Cosmochemica Acta 43:1651-1661, 1979,
-#     # '       same as Millero, GCA 1995 except for typos (-.5304, -.3692,
-#     # '       and 10^3 for Kappa factor)
-#     deltaVKAr = deltaVKCa + 2.8;
-#     KappaKAr  = KappaKCa;
-#     lnKArfac  = (-deltaVKAr + 0.5.*KappaKAr.*Pbar) *Pbar / RT
-#     KAr       = KAr.*exp(lnKArfac);
-# end
-# F = @. (WhichKs == 6 | WhichKs==7);
-# if any(F)
-#     #
-#     # *** CalculateCaforGEOSECS:
-#     # Culkin, F, in Chemical Oceanography, ed. Riley and Skirrow, 1965:
-#     # (quoted in Takahashi et al, GEOSECS Pacific Expedition v. 3, 1982)
-#     Ca[F] = 0.01026.*Sal[F]./35;
-#     # Culkin gives Ca = (.0213./40.078).*(Sal./1.80655) in mol/kg-SW
-#     # which corresponds to Ca = .01030.*Sal./35.
-#     #
-#     # *** CalculateKCaforGEOSECS:
-#     # Ingle et al, Marine Chemistry 1:295-307, 1973 is referenced in
-#     # (quoted in Takahashi et al, GEOSECS Pacific Expedition v. 3, 1982
-#     # but the fit is actually from Ingle, Marine Chemistry 3:301-319, 1975)
-#     KCa[F] = 0.0000001.*(-34.452 - 39.866.*Sal[F].^(1./3) +
-#         110.21.*log(Sal[F])./log(10) - 0.0000075752.*TempK[F].^2);
-#     # this is in (mol/kg-SW)^2
-#     #
-#     # *** CalculateKArforGEOSECS:
-#     # Berner, R. A., American Journal of Science 276:713-730, 1976:
-#     # (quoted in Takahashi et al, GEOSECS Pacific Expedition v. 3, 1982)
-#     KAr[F] = 1.45.*KCa[F];# ' this is in (mol/kg-SW)^2
-#     # Berner (p. 722) states that he uses 1.48.
-#     # It appears that 1.45 was used in the GEOSECS calculations
-#     #
-#     # *** CalculatePressureEffectsOnKCaKArGEOSECS:
-#     # Culberson and Pytkowicz, Limnology and Oceanography 13:403-417, 1968
-#     # (quoted in Takahashi et al, GEOSECS Pacific Expedition v. 3, 1982
-#     # but their paper is not even on this topic).
-#     # The fits appears to be new in the GEOSECS report.
-#     # I can't find them anywhere else.
-#     KCa[F] = KCa[F].*exp((36   - 0.2 .*TempC[F]).*Pbar[F]./RT[F]);
-#     KAr[F] = KAr[F].*exp((33.3 - 0.22.*TempC[F]).*Pbar[F]./RT[F]);
-# end
+# '***********************************************************************
+# ' SUB CaSolubility, version 01.05, 05-23-97, written by Ernie Lewis.
+# ' Inputs: WhichKs#, Sal, TempCi, Pdbari, TCi, pHi, K1, K2
+# ' Outputs: OmegaCa, OmegaAr
+# ' This calculates omega, the solubility ratio, for calcite and aragonite.
+# ' This is defined by: Omega = [CO3--]*[Ca++]./Ksp,
+# '       where Ksp is the solubility product (either KCa or KAr).
+# '***********************************************************************
+# ' These are from:
+# ' Mucci, Alphonso, The solubility of calcite and aragonite in seawater
+# '       at various salinities, temperatures, and one atmosphere total
+# '       pressure, American Journal of Science 283:781-799, 1983.
+# ' Ingle, S. E., Solubility of calcite in the ocean,
+# '       Marine Chemistry 3:301-319, 1975,
+# ' Millero, Frank, The thermodynamics of the carbonate system in seawater,
+# '       Geochemica et Cosmochemica Acta 43:1651-1661, 1979.
+# ' Ingle et al, The solubility of calcite in seawater at atmospheric pressure
+# '       and 35#o salinity, Marine Chemistry 1:295-307, 1973.
+# ' Berner, R. A., The solubility of calcite and aragonite in seawater in
+# '       atmospheric pressure and 34.5#o salinity, American Journal of
+# '       Science 276:713-730, 1976.
+# ' Takahashi et al, in GEOSECS Pacific Expedition, v. 3, 1982.
+# ' Culberson, C. H. and Pytkowicz, R. M., Effect of pressure on carbonic acid,
+# '       boric acid, and the pHi of seawater, Limnology and Oceanography
+# '       13:403-417, 1968.
+# '***********************************************************************
+Ca = fill(NaN,ntps)
+Ar = fill(NaN,ntps)
+KCa = fill(NaN,ntps)
+KAr = fill(NaN,ntps)
+F = @. (WhichKs != 6) & (WhichKs != 7)
+if any(F)
+# (below here, F isn't used, since almost always all rows match the above criterium,
+#  in all other cases the rows will be overwritten later on).
+    # CalculateCa:
+    # '       Riley, J. P. and Tongudai, M., Chemical Geology 2:263-269, 1967:
+    # '       this is .010285.*Sali./35
+    Ca = @. 0.02128/40.087 * (Sal/1.80655) # ' in mol/kg-SW
+    # CalciteSolubility:
+    # '       Mucci, Alphonso, Amer. J. of Science 283:781-799, 1983.
+    logKCa = @. -171.9065 - 0.077993TempK + 2839.319/TempK
+    logKCa = @. logKCa + 71.595logTempK/log(10)
+    logKCa = @. logKCa + (-0.77712 + 0.0028426TempK + 178.34/TempK) * sqrSal
+    logKCa = @. logKCa - 0.07711Sal + 0.0041249sqrSal*Sal
+    # '       sd fit = .01 (for Sal part, not part independent of Sal)
+    KCa = 10.0 .^ logKCa # ' this is in (mol/kg-SW)^2
+    # AragoniteSolubility:
+    # '       Mucci, Alphonso, Amer. J. of Science 283:781-799, 1983.
+    logKAr = @. -171.945 - 0.077993TempK + 2903.293/TempK
+    logKAr = @. logKAr + 71.595logTempK/log(10)
+    logKAr = @. logKAr + (-0.068393 + 0.0017276TempK + 88.135/TempK) * sqrSal
+    logKAr = @. logKAr - 0.10018Sal + 0.0059415sqrSal*Sal
+    # '       sd fit = .009 (for Sal part, not part independent of Sal)
+    KAr    = 10.0 .^ logKAr # ' this is in (mol/kg-SW)^2
+    # PressureCorrectionForCalcite:
+    # '       Ingle, Marine Chemistry 3:301-319, 1975
+    # '       same as in Millero, GCA 43:1651-1661, 1979, but Millero, GCA 1995
+    # '       has typos (-.5304, -.3692, and 10^3 for Kappa factor)
+    deltaVKCa = @. -48.76 + 0.5304TempC
+    KappaKCa  = @. (-11.76 + 0.3692TempC) / 1000
+    lnKCafac  = @. (-deltaVKCa + 0.5KappaKCa*Pbar) * Pbar / RT
+    KCa       = @. KCa * exp(lnKCafac)
+    # PressureCorrectionForAragonite:
+    # '       Millero, Geochemica et Cosmochemica Acta 43:1651-1661, 1979,
+    # '       same as Millero, GCA 1995 except for typos (-.5304, -.3692,
+    # '       and 10^3 for Kappa factor)
+    deltaVKAr = deltaVKCa .+ 2.8
+    KappaKAr  = deepcopy(KappaKCa)
+    lnKArfac  = @. (-deltaVKAr + 0.5KappaKAr*Pbar) * Pbar / RT
+    KAr       = @. KAr * exp(lnKArfac)
+end
+F = @. (WhichKs == 6) | (WhichKs == 7)
+if any(F)
+    #
+    # *** CalculateCaforGEOSECS:
+    # Culkin, F, in Chemical Oceanography, ed. Riley and Skirrow, 1965:
+    # (quoted in Takahashi et al, GEOSECS Pacific Expedition v. 3, 1982)
+    Ca[F] = @. 0.01026Sal[F] / 35
+    # Culkin gives Ca = (.0213./40.078).*(Sal./1.80655) in mol/kg-SW
+    # which corresponds to Ca = .01030.*Sal./35.
+    #
+    # *** CalculateKCaforGEOSECS:
+    # Ingle et al, Marine Chemistry 1:295-307, 1973 is referenced in
+    # (quoted in Takahashi et al, GEOSECS Pacific Expedition v. 3, 1982
+    # but the fit is actually from Ingle, Marine Chemistry 3:301-319, 1975)
+    KCa[F] = @. 0.0000001 * (-34.452 - 39.866Sal[F]^(1/3) +
+        110.21*log(Sal[F])/log(10) - 0.0000075752TempK[F]^2)
+    # this is in (mol/kg-SW)^2
+    #
+    # *** CalculateKArforGEOSECS:
+    # Berner, R. A., American Journal of Science 276:713-730, 1976:
+    # (quoted in Takahashi et al, GEOSECS Pacific Expedition v. 3, 1982)
+    KAr[F] .= 1.45KCa[F] # ' this is in (mol/kg-SW)^2
+    # Berner (p. 722) states that he uses 1.48.
+    # It appears that 1.45 was used in the GEOSECS calculations
+    #
+    # *** CalculatePressureEffectsOnKCaKArGEOSECS:
+    # Culberson and Pytkowicz, Limnology and Oceanography 13:403-417, 1968
+    # (quoted in Takahashi et al, GEOSECS Pacific Expedition v. 3, 1982
+    # but their paper is not even on this topic).
+    # The fits appears to be new in the GEOSECS report.
+    # I can't find them anywhere else.
+    KCa[F] = @. KCa[F] * exp((36   - 0.2TempC[F]) * Pbar[F]/RT[F])
+    KAr[F] = @. KAr[F] * exp((33.3 - 0.22TempC[F]) * Pbar[F]/RT[F])
+end
 # # Added by JM Epitalon
 # # For computing derivative with respect to KCa or KAr, one has to perturb the value of one K
 # # Requested perturbation is passed through global variables PertK and Perturb
@@ -1907,40 +1908,38 @@ end # end nested function
 #             KCa = KCa + Perturb;
 #     end
 # end
-#
-# # CalculateOmegasHere:
-# H = 10.^(-pH);
-# CO3 = TC.*K1.*K2./(K1.*H + H.*H + K1.*K2);
-# varargout{1} = CO3.*Ca./KCa; # OmegaCa, dimensionless
-# varargout{2} = CO3.*Ca./KAr; # OmegaAr, dimensionless
-# end # end nested function
-#
-#
-# function FindpHOnAllScales(pH)
-# global pHScale K T TS KS TF KF fH ntps;
-# # ' SUB FindpHOnAllScales, version 01.02, 01-08-97, written by Ernie Lewis.
-# # ' Inputs: pHScale#, pH, K(), T(), fH
-# # ' Outputs: pHNBS, pHfree, pHTot, pHSWS
-# # ' This takes the pH on the given scale and finds the pH on all scales.
-# #  TS = T(3); TF = T(2);
-# #  KS = K(6); KF = K(5);# 'these are at the given T, S, P
-# FREEtoTOT = (1 + TS./KS);# ' pH scale conversion factor
-# SWStoTOT  = (1 + TS./KS)./(1 + TS./KS + TF./KF);# ' pH scale conversion factor
-# factor=fill(NaN,ntps);
-# F=pHScale==1;  #'"pHtot"
-# factor[F] = 0;
-# F=pHScale==2; # '"pHsws"
-# factor[F] = -log(SWStoTOT[F])./log(0.1);
-# F=pHScale==3; # '"pHfree"
-# factor[F] = -log(FREEtoTOT[F])./log(0.1);
-# F=pHScale==4;  #'"pHNBS"
-# factor[F] = -log(SWStoTOT[F])./log(0.1) + log(fH[F])./log(0.1);
-# pHtot  = pH    - factor;    # ' pH comes into this sub on the given scale
-# pHNBS  = pHtot - log(SWStoTOT) ./log(0.1) + log(fH)./log(0.1);
-# pHfree = pHtot - log(FREEtoTOT)./log(0.1);
-# pHsws  = pHtot - log(SWStoTOT) ./log(0.1);
-# return pHtot;
-# varargout{2}=pHsws;
-# varargout{3}=pHfree;
-# varargout{4}=pHNBS;
-# end # end nested function
+
+# CalculateOmegasHere:
+H = 10.0 .^ -pH
+CO3 = @. TC*K1*K2 / (K1*H + H^2 + K1*K2)
+OmegaCa = @. CO3 * Ca / KCa # OmegaCa, dimensionless
+OmegaAr = @. CO3 * Ca / KAr # OmegaAr, dimensionless
+return OmegaCa, OmegaAr
+end # end nested function
+
+
+function FindpHOnAllScales(pH)
+global pHScale, K, T, TS, KS, TF, KF, fH, ntps
+# ' SUB FindpHOnAllScales, version 01.02, 01-08-97, written by Ernie Lewis.
+# ' Inputs: pHScale#, pH, K(), T(), fH
+# ' Outputs: pHNBS, pHfree, pHTot, pHSWS
+# ' This takes the pH on the given scale and finds the pH on all scales.
+#  TS = T(3); TF = T(2);
+#  KS = K(6); KF = K(5);# 'these are at the given T, S, P
+FREEtoTOT = @. 1 + TS/KS # ' pH scale conversion factor
+SWStoTOT  = @. (1 + TS/KS) / (1 + TS/KS + TF/KF) # ' pH scale conversion factor
+factor = fill(NaN,ntps)
+F = @. (pHScale == 1)  #'"pHtot"
+factor[F] .= 0
+F = @. (pHScale == 2) # '"pHsws"
+factor[F] = @. -log(SWStoTOT[F]) / log(0.1);
+F = @. (pHScale == 3) # '"pHfree"
+factor[F] = @. -log(FREEtoTOT[F]) / log(0.1);
+F = @. (pHScale == 4)  #'"pHNBS"
+factor[F] = @. -log(SWStoTOT[F]) / log(0.1) + log(fH[F]) / log(0.1)
+pHtot  = @. pH    - factor    # ' pH comes into this sub on the given scale
+pHNBS  = @. pHtot - log(SWStoTOT) /log(0.1) + log(fH)/log(0.1)
+pHfree = @. pHtot - log(FREEtoTOT)/log(0.1)
+pHsws  = @. pHtot - log(SWStoTOT) /log(0.1)
+return pHtot, pHsws, pHfree, pHNBS
+end # end nested function
