@@ -1,3 +1,7 @@
+module CO2SYSjl
+
+export CO2SYS
+
 function CO2SYS(PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,
     SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS)
 #**************************************************************************
@@ -1962,3 +1966,5 @@ pHfree = @. pHtot - log(FREEtoTOT)/log(0.1)
 pHsws  = @. pHtot - log(SWStoTOT) /log(0.1)
 return pHtot, pHsws, pHfree, pHNBS
 end # end nested function
+
+end # module CO2SYSjl
