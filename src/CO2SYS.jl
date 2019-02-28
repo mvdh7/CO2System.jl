@@ -4,7 +4,7 @@ function CO2SYS(PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,
 #
 # First   CO2SYS.m version: 1.1 (Sep 2011)
 # Current CO2SYS.m version: 2.0 (20 Dec 2016)
-# Current CO2SYS.jl version: 2.0 (2019)
+# Current CO2SYS.jl version: 2.0.5-jl1 (2019)
 #
 # For Julia version updates, bug reports and support:
 #   https://github.com/mvdh7/CO2SYS.jl
@@ -286,7 +286,30 @@ global TB, TF, TS, TP, TSi, F
 
 # Input conditioning
 
-# Get list of all vectors [Julia]
+# Convert scalars to arrays [Julia only]
+function scalar2array(argin)
+    if size(argin) == ()
+        argin = [argin]
+    end
+    return argin
+end
+
+PAR1          = scalar2array(PAR1)
+PAR2          = scalar2array(PAR2)
+PAR1TYPE      = scalar2array(PAR1TYPE)
+PAR2TYPE      = scalar2array(PAR2TYPE)
+SAL           = scalar2array(SAL)
+TEMPIN        = scalar2array(TEMPIN)
+TEMPOUT       = scalar2array(TEMPOUT)
+PRESIN        = scalar2array(PRESIN)
+PRESOUT       = scalar2array(PRESOUT)
+SI            = scalar2array(SI)
+PO4           = scalar2array(PO4)
+pHSCALEIN     = scalar2array(pHSCALEIN)
+K1K2CONSTANTS = scalar2array(K1K2CONSTANTS)
+KSO4CONSTANTS = scalar2array(KSO4CONSTANTS)
+
+# Get list of all vectors [Julia only]
 allvecs = [PAR1, PAR2, PAR1TYPE, PAR2TYPE, SAL, TEMPIN, TEMPOUT,
     PRESIN, PRESOUT, SI, PO4, pHSCALEIN, K1K2CONSTANTS, KSO4CONSTANTS]
 
@@ -971,10 +994,6 @@ if any(F)
     K2[F] = @. exp(lnK2[F]) *    # this is on the total pH scale in mol/kg-H2O
         (1 - 0.001005.*Sal[F]) / # convert to mol/kg-SW
         SWStoTOT[F]              # convert to SWS pH scale
-
-    println(lnK1)
-    println(K1)
-
 end
 F = @. (WhichKs == 2)
 if any(F)
@@ -1151,14 +1170,14 @@ if any(F)
 	A_1   = @. 13.4191Sal[F]^0.5 + 0.0331Sal[F] - 5.33e-5Sal[F]^2
 	B_1   = @. -530.123Sal[F]^0.5 - 6.103Sal[F]
 	C_1   = @. -2.06950Sal[F]^0.5
-	pK1[F]= @. A_1 + B_1/TempK[F] + C_1*log(TempK[F]) + pK1_0 # pK1 sigma = 0.0054
-    K1[F] = 10.0 .^ -pK1[F]
+	pK1   = @. A_1 + B_1/TempK[F] + C_1*log(TempK[F]) + pK1_0 # pK1 sigma = 0.0054
+    K1[F] = 10.0 .^ -pK1
 	pK2_0 = @. -90.18333 + 5143.692/TempK[F] + 14.613358*log(TempK[F])
 	A_2   = @. 21.0894Sal[F]^0.5 + 0.1248Sal[F] - 3.687e-4Sal[F]^2
 	B_2   = @. -772.483Sal[F]^0.5 - 20.051Sal[F]
 	C_2   = @. -3.3336Sal[F]^0.5
-	pK2[F]= @. A_2 + B_2/TempK[F] + C_2*log(TempK[F]) + pK2_0 #pK2 sigma = 0.011
-    K2[F] = 10.0 .^ -pK2[F]
+	pK2   = @. A_2 + B_2/TempK[F] + C_2*log(TempK[F]) + pK2_0 #pK2 sigma = 0.011
+    K2[F] = 10.0 .^ -pK2
 end
 F = @. (WhichKs == 14)
 if any(F)
