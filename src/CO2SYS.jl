@@ -968,6 +968,10 @@ if any(F)
     K2[F] = @. exp(lnK2[F]) *    # this is on the total pH scale in mol/kg-H2O
         (1 - 0.001005.*Sal[F]) / # convert to mol/kg-SW
         SWStoTOT[F]              # convert to SWS pH scale
+
+    println(lnK1)
+    println(K1)
+
 end
 F = @. (WhichKs == 2)
 if any(F)
@@ -1078,417 +1082,414 @@ if any(F)
     lnK2[F] = @. 207.6548 - 11843.79/TempK[F] - 33.6485logTempK[F]
     K2[F] = exp.(lnK2[F])
 end
-# F = @. (WhichKs == 9);
-# if any(F)
-#     # From Cai and Wang 1998, for estuarine use.
-# 	# Data used in this work is from:
-# 	# K1: Merhback (1973) for S>15, for S<15: Mook and Keone (1975)
-# 	# K2: Merhback (1973) for S>20, for S<20: Edmond and Gieskes (1970)
-# 	# Sigma of residuals between fits and above data: ±0.015, +0.040 for K1 and K2, respectively.
-# 	# Sal 0-40, Temp 0.2-30
-#     # Limnol. Oceanogr. 43(4) (1998) 657-668
-# 	# On the NBS scale
-# 	# Their check values for F1 don't work out, not sure if this was correctly published
-# 	F1 = 200.1./TempK[F] + 0.3220;
-# 	pK1[F] = 3404.71./TempK[F] + 0.032786.*TempK[F] - 14.8435 - 0.071692.*F1.*Sal[F].^0.5 + 0.0021487.*Sal[F];
-#     K1[F]  = 10.^-pK1[F]         # this is on the NBS scale
-#         ./fH[F];                    # convert to SWS scale (uncertain at low Sal due to junction potential);
-# 	F2 = -129.24./TempK[F] + 1.4381;
-# 	pK2[F] = 2902.39./TempK[F] + 0.02379.*TempK[F] - 6.4980 - 0.3191.*F2.*Sal[F].^0.5 + 0.0198.*Sal[F];
-#     K2[F]  = 10.^-pK2[F]         # this is on the NBS scale
-#         ./fH[F];                    # convert to SWS scale (uncertain at low Sal due to junction potential);
-# end
-# F = @. (WhichKs == 10);
-# if any(F)
-#     # From Lueker, Dickson, Keeling, 2000
-# 	# This is Mehrbach's data refit after conversion to the total scale, for comparison with their equilibrator work.
-#     # Mar. Chem. 70 (2000) 105-119
-#     # Total scale and kg-sw
-#     pK1[F] = 3633.86./TempK[F]-61.2172+9.6777.*log(TempK[F])-0.011555.*Sal[F]+0.0001152.*Sal[F].^2;
-# 	K1[F]  = 10.^-pK1[F]           # this is on the total pH scale in mol/kg-SW
-#         ./SWStoTOT[F];                # convert to SWS pH scale
-#     pK2[F] = 471.78./TempK[F]+25.929 -3.16967.*log(TempK[F])-0.01781 .*Sal[F]+0.0001122.*Sal[F].^2;
-# 	K2[F]  = 10.^-pK2[F]           # this is on the total pH scale in mol/kg-SW
-#         ./SWStoTOT[F];                # convert to SWS pH scale
-# end
-# F = @. (WhichKs == 11);
-# if any(F)
-# 	# Mojica Prieto and Millero 2002. Geochim. et Cosmochim. Acta. 66(14) 2529-2540.
-# 	# sigma for pK1 is reported to be 0.0056
-# 	# sigma for pK2 is reported to be 0.010
-# 	# This is from the abstract and pages 2536-2537
-#     pK1 =  -43.6977 - 0.0129037.*Sal[F] + 1.364e-4.*Sal[F].^2 + 2885.378./TempK[F] +  7.045159.*log(TempK[F]);
-#     pK2 = -452.0940 + 13.142162.*Sal[F] - 8.101e-4.*Sal[F].^2 + 21263.61./TempK[F] + 68.483143.*log(TempK[F])
-# 				+ (-581.4428.*Sal[F] + 0.259601.*Sal[F].^2)./TempK[F] - 1.967035.*Sal[F].*log(TempK[F]);
-# 	K1[F] = 10.^-pK1; # this is on the SWS pH scale in mol/kg-SW
-# 	K2[F] = 10.^-pK2; # this is on the SWS pH scale in mol/kg-SW
-# end
-# F = @. (WhichKs == 12);
-# if any(F)
-# 	# Millero et al., 2002. Deep-Sea Res. I (49) 1705-1723.
-# 	# Calculated from overdetermined WOCE-era field measurements
-# 	# sigma for pK1 is reported to be 0.005
-# 	# sigma for pK2 is reported to be 0.008
-# 	# This is from page 1715
-#     pK1 =  6.359 - 0.00664.*Sal[F] - 0.01322.*TempC[F] + 4.989e-5.*TempC[F].^2;
-#     pK2 =  9.867 - 0.01314.*Sal[F] - 0.01904.*TempC[F] + 2.448e-5.*TempC[F].^2;
-# 	K1[F] = 10.^-pK1; # this is on the SWS pH scale in mol/kg-SW
-# 	K2[F] = 10.^-pK2; # this is on the SWS pH scale in mol/kg-SW
-# end
-# F = @. (WhichKs == 13);
-# if any(F)
-#     # From Millero 2006 work on pK1 and pK2 from titrations
-# 	# Millero, Graham, Huang, Bustos-Serrano, Pierrot. Mar.Chem. 100 (2006) 80-94.
-#     # S=1 to 50, T=0 to 50. On seawater scale (SWS). From titrations in Gulf Stream seawater.
-# 	pK1_0 = -126.34048 + 6320.813./TempK[F] + 19.568224*log(TempK[F]);
-# 	A_1   = 13.4191*Sal[F].^0.5 + 0.0331.*Sal[F] - 5.33e-5.*Sal[F].^2;
-# 	B_1   = -530.123*Sal[F].^0.5 - 6.103.*Sal[F];
-# 	C_1   = -2.06950.*Sal[F].^0.5;
-# 	pK1[F]= A_1 + B_1./TempK[F] + C_1.*log(TempK[F]) + pK1_0; # pK1 sigma = 0.0054
-#     K1[F] = 10.^-(pK1[F]);
-# 	pK2_0= -90.18333 + 5143.692./TempK[F] + 14.613358*log(TempK[F]);
-# 	A_2   = 21.0894*Sal[F].^0.5 + 0.1248.*Sal[F] - 3.687e-4.*Sal[F].^2;
-# 	B_2   = -772.483*Sal[F].^0.5 - 20.051.*Sal[F];
-# 	C_2   = -3.3336.*Sal[F].^0.5;
-# 	pK2[F]= A_2 + B_2./TempK[F] + C_2.*log(TempK[F]) + pK2_0; #pK2 sigma = 0.011
-#     K2[F] = 10.^-(pK2[F]);
-# end
-# F = @. (WhichKs == 14);
-# if any(F)
-#     # From Millero, 2010, also for estuarine use.
-# 	# Marine and Freshwater Research, v. 61, p. 139–142.
-# 	# Fits through compilation of real seawater titration results:
-# 	# Mehrbach et al. (1973), Mojica-Prieto & Millero (2002), Millero et al. (2006)
-# 	# Constants for K's on the SWS;
-# 	# This is from page 141
-# 	pK10 = -126.34048 + 6320.813./TempK[F] + 19.568224.*log(TempK[F]);
-# 	# This is from their table 2, page 140.
-# 	A1 = 13.4038.*Sal[F].^0.5 + 0.03206.*Sal[F] - 5.242e-5.*Sal[F].^2;
-# 	B1 = -530.659.*Sal[F].^0.5 - 5.8210.*Sal[F];
-# 	C1 = -2.0664*Sal[F].^0.5;
-# 	pK1 = pK10 + A1 + B1./TempK[F] + C1.*log(TempK[F]);
-# 	K1[F] = 10.^-pK1;
-# 	# This is from page 141
-# 	pK20 =  -90.18333 + 5143.692./TempK[F] + 14.613358.*log(TempK[F]);
-# 	# This is from their table 3, page 140.
-# 	A2 = 21.3728.*Sal[F].^0.5 + 0.1218.*Sal[F] - 3.688e-4.*Sal[F].^2;
-# 	B2 = -788.289.*Sal[F].^0.5 - 19.189.*Sal[F];
-# 	C2 = -3.374.*Sal[F].^0.5;
-# 	pK2 = pK20 + A2 + B2./TempK[F] + C2.*log(TempK[F]);
-# 	K2[F] = 10.^-pK2;
-# end
-# F = @. (WhichKs == 15);
-# # Added by J. C. Orr on 4 Dec 2016
-# if any(F)
-#     # From Waters, Millero, Woosley 2014
-# 	# Mar. Chem., 165, 66-67, 2014
-#         # Corrigendum to “The free proton concentration scale for seawater pH”.
-# 	# Effectively, this is an update of Millero (2010) formulation (WhichKs==14)
-# 	# Constants for K's on the SWS;
-# 	pK10 = -126.34048 + 6320.813./TempK[F] + 19.568224.*log(TempK[F]);
-# 	A1 = 13.409160.*Sal[F].^0.5 + 0.031646.*Sal[F] - 5.1895e-5.*Sal[F].^2;
-# 	B1 = -531.3642.*Sal[F].^0.5 - 5.713.*Sal[F];
-# 	C1 = -2.0669166.*Sal[F].^0.5;
-# 	pK1 = pK10 + A1 + B1./TempK[F] + C1.*log(TempK[F]);
-# 	K1[F] = 10.^-pK1;
-# 	pK20 =  -90.18333 + 5143.692./TempK[F] + 14.613358.*log(TempK[F]);
-# 	A2 = 21.225890.*Sal[F].^0.5 + 0.12450870.*Sal[F] - 3.7243e-4.*Sal[F].^2;
-# 	B2 = -779.3444.*Sal[F].^0.5 - 19.91739.*Sal[F];
-# 	C2 = -3.3534679.*Sal[F].^0.5;
-# 	pK2 = pK20 + A2 + B2./TempK[F] + C2.*log(TempK[F]);
-# 	K2[F] = 10.^-pK2;
-# end
+F = @. (WhichKs == 9)
+if any(F)
+    # From Cai and Wang 1998, for estuarine use.
+	# Data used in this work is from:
+	# K1: Merhback (1973) for S>15, for S<15: Mook and Keone (1975)
+	# K2: Merhback (1973) for S>20, for S<20: Edmond and Gieskes (1970)
+	# Sigma of residuals between fits and above data: ±0.015, +0.040 for K1 and K2, respectively.
+	# Sal 0-40, Temp 0.2-30
+    # Limnol. Oceanogr. 43(4) (1998) 657-668
+	# On the NBS scale
+	# Their check values for F1 don't work out, not sure if this was correctly published
+	F1 = @. 200.1/TempK[F] + 0.3220
+	pK1[F] = @. 3404.71/TempK[F] + 0.032786*TempK[F] - 14.8435 - 0.071692F1*Sal[F]^0.5 + 0.0021487Sal[F]
+    K1[F] = @. 10.0^-pK1[F] / # this is on the NBS scale
+        fH[F]                 # convert to SWS scale (uncertain at low Sal due to junction potential);
+	F2 = @. -129.24/TempK[F] + 1.4381
+	pK2[F] = @. 2902.39/TempK[F] + 0.02379TempK[F] - 6.4980 - 0.3191F2*Sal[F]^0.5 + 0.0198Sal[F]
+    K2[F] = @. 10^-pK2[F] # this is on the NBS scale
+        fH[F]             # convert to SWS scale (uncertain at low Sal due to junction potential);
+end
+F = @. (WhichKs == 10)
+if any(F)
+    # From Lueker, Dickson, Keeling, 2000
+	# This is Mehrbach's data refit after conversion to the total scale, for comparison with their equilibrator work.
+    # Mar. Chem. 70 (2000) 105-119
+    # Total scale and kg-sw
+    pK1[F] = @. 3633.86/TempK[F] - 61.2172 + 9.6777*log(TempK[F]) - 0.011555Sal[F] + 0.0001152Sal[F]^2
+	K1[F] = @. 10.0^-pK1[F] / # this is on the total pH scale in mol/kg-SW
+        SWStoTOT[F]           # convert to SWS pH scale
+    pK2[F] = @. 471.78./TempK[F] + 25.929 - 3.16967*log(TempK[F]) - 0.01781Sal[F] + 0.0001122Sal[F]^2
+	K2[F] = @. 10.0^-pK2[F] / # this is on the total pH scale in mol/kg-SW
+        SWStoTOT[F]           # convert to SWS pH scale
+end
+F = @. (WhichKs == 11)
+if any(F)
+	# Mojica Prieto and Millero 2002. Geochim. et Cosmochim. Acta. 66(14) 2529-2540.
+	# sigma for pK1 is reported to be 0.0056
+	# sigma for pK2 is reported to be 0.010
+	# This is from the abstract and pages 2536-2537
+    pK1 = @.  -43.6977 - 0.0129037Sal[F] + 1.364e-4Sal[F]^2 + 2885.378/TempK[F] +  7.045159*log(TempK[F])
+    pK2 = @. -452.0940 + 13.142162Sal[F] - 8.101e-4Sal[F]^2 + 21263.61/TempK[F] + 68.483143*log(TempK[F]) +
+	    (-581.4428Sal[F] + 0.259601Sal[F]^2)/TempK[F] - 1.967035Sal[F]*log(TempK[F])
+	K1[F] = 10.0 .^ -pK1 # this is on the SWS pH scale in mol/kg-SW
+	K2[F] = 10.0 .^ -pK2 # this is on the SWS pH scale in mol/kg-SW
+end
+F = @. (WhichKs == 12)
+if any(F)
+	# Millero et al., 2002. Deep-Sea Res. I (49) 1705-1723.
+	# Calculated from overdetermined WOCE-era field measurements
+	# sigma for pK1 is reported to be 0.005
+	# sigma for pK2 is reported to be 0.008
+	# This is from page 1715
+    pK1 = @. 6.359 - 0.00664Sal[F] - 0.01322TempC[F] + 4.989e-5TempC[F]^2
+    pK2 = @. 9.867 - 0.01314Sal[F] - 0.01904TempC[F] + 2.448e-5TempC[F]^2
+	K1[F] = 10.0 .^ -pK1 # this is on the SWS pH scale in mol/kg-SW
+	K2[F] = 10.0 .^ -pK2 # this is on the SWS pH scale in mol/kg-SW
+end
+F = @. (WhichKs == 13)
+if any(F)
+    # From Millero 2006 work on pK1 and pK2 from titrations
+	# Millero, Graham, Huang, Bustos-Serrano, Pierrot. Mar.Chem. 100 (2006) 80-94.
+    # S=1 to 50, T=0 to 50. On seawater scale (SWS). From titrations in Gulf Stream seawater.
+	pK1_0 = @. -126.34048 + 6320.813/TempK[F] + 19.568224*log(TempK[F])
+	A_1   = @. 13.4191Sal[F]^0.5 + 0.0331Sal[F] - 5.33e-5Sal[F]^2
+	B_1   = @. -530.123Sal[F]^0.5 - 6.103Sal[F]
+	C_1   = @. -2.06950Sal[F]^0.5
+	pK1[F]= @. A_1 + B_1/TempK[F] + C_1*log(TempK[F]) + pK1_0 # pK1 sigma = 0.0054
+    K1[F] = 10.0 .^ -pK1[F]
+	pK2_0 = @. -90.18333 + 5143.692/TempK[F] + 14.613358*log(TempK[F])
+	A_2   = @. 21.0894Sal[F]^0.5 + 0.1248Sal[F] - 3.687e-4Sal[F]^2
+	B_2   = @. -772.483Sal[F]^0.5 - 20.051Sal[F]
+	C_2   = @. -3.3336Sal[F]^0.5
+	pK2[F]= @. A_2 + B_2/TempK[F] + C_2*log(TempK[F]) + pK2_0 #pK2 sigma = 0.011
+    K2[F] = 10.0 .^ -pK2[F]
+end
+F = @. (WhichKs == 14)
+if any(F)
+    # From Millero, 2010, also for estuarine use.
+	# Marine and Freshwater Research, v. 61, p. 139–142.
+	# Fits through compilation of real seawater titration results:
+	# Mehrbach et al. (1973), Mojica-Prieto & Millero (2002), Millero et al. (2006)
+	# Constants for K's on the SWS;
+	# This is from page 141
+	pK10 = @. -126.34048 + 6320.813/TempK[F] + 19.568224*log(TempK[F])
+	# This is from their table 2, page 140.
+	A1 = @. 13.4038Sal[F]^0.5 + 0.03206Sal[F] - 5.242e-5Sal[F]^2
+	B1 = @. -530.659Sal[F]^0.5 - 5.8210Sal[F]
+	C1 = @. -2.0664Sal[F]^0.5
+	pK1 = @. pK10 + A1 + B1/TempK[F] + C1*log(TempK[F])
+	K1[F] = 10.0 .^ -pK1
+	# This is from page 141
+	pK20 = @.  -90.18333 + 5143.692/TempK[F] + 14.613358*log(TempK[F])
+	# This is from their table 3, page 140.
+	A2 = @. 21.3728Sal[F]^0.5 + 0.1218Sal[F] - 3.688e-4Sal[F]^2
+	B2 = @. -788.289Sal[F]^0.5 - 19.189Sal[F]
+	C2 = @. -3.374Sal[F]^0.5
+	pK2 = @. pK20 + A2 + B2/TempK[F] + C2*log(TempK[F])
+	K2[F] = 10.0 .^ -pK2
+end
+F = @. (WhichKs == 15);
+# Added by J. C. Orr on 4 Dec 2016
+if any(F)
+    # From Waters, Millero, Woosley 2014
+	# Mar. Chem., 165, 66-67, 2014
+        # Corrigendum to “The free proton concentration scale for seawater pH”.
+	# Effectively, this is an update of Millero (2010) formulation (WhichKs==14)
+	# Constants for K's on the SWS;
+	pK10 = @. -126.34048 + 6320.813/TempK[F] + 19.568224*log(TempK[F])
+	A1 = @. 13.409160Sal[F]^0.5 + 0.031646Sal[F] - 5.1895e-5Sal[F]^2
+	B1 = @. -531.3642Sal[F]^0.5 - 5.713Sal[F]
+	C1 = @. -2.0669166Sal[F]^0.5
+	pK1 = @. pK10 + A1 + B1/TempK[F] + C1*log(TempK[F])
+	K1[F] = 10.0 .^ -pK1
+	pK20 = @.  -90.18333 + 5143.692/TempK[F] + 14.613358*log(TempK[F])
+	A2 = @. 21.225890Sal[F]^0.5 + 0.12450870Sal[F] - 3.7243e-4Sal[F]^2
+	B2 = @. -779.3444Sal[F]^0.5 - 19.91739Sal[F]
+	C2 = @. -3.3534679Sal[F]^0.5
+	pK2 = @. pK20 + A2 + B2/TempK[F] + C2*log(TempK[F])
+	K2[F] = 10.0 .^ -pK2
+end
 
-println(K1)
-println(K2)
+#***************************************************************************
+#CorrectKsForPressureNow:
+# Currently: For WhichKs# = 1 to 7, all Ks (except KF and KS, which are on
+#       the free scale) are on the SWS scale.
+#       For WhichKs# = 6, KW set to 0, KP1, KP2, KP3, KSi don't matter.
+#       For WhichKs# = 8, K1, K2, and KW are on the "pH" pH scale
+#       (the pH scales are the same in this case); the other Ks don't matter.
+#
+#
+# No salinity dependence is given for the pressure coefficients here.
+# It is assumed that the salinity is at or very near Sali = 35.
+# These are valid for the SWS pH scale, but the difference between this and
+# the total only yields a difference of .004 pH units at 1000 bars, much
+# less than the uncertainties in the values.
+#****************************************************************************
+# The sources used are:
+# Millero, 1995:
+#       Millero, F. J., Thermodynamics of the carbon dioxide system in the
+#       oceans, Geochemica et Cosmochemica Acta 59:661-677, 1995.
+#       See table 9 and eqs. 90-92, p. 675.
+#       TYPO: a factor of 10^3 was left out of the definition of Kappa
+#       TYPO: the value of R given is incorrect with the wrong units
+#       TYPO: the values of the a's for H2S and H2O are from the 1983
+#                values for fresh water
+#       TYPO: the value of a1 for B(OH)3 should be +.1622
+#        Table 9 on p. 675 has no values for Si.
+#       There are a variety of other typos in Table 9 on p. 675.
+#       There are other typos in the paper, and most of the check values
+#       given don't check.
+# Millero, 1992:
+#       Millero, Frank J., and Sohn, Mary L., Chemical Oceanography,
+#       CRC Press, 1992. See chapter 6.
+#       TYPO: this chapter has numerous typos (eqs. 36, 52, 56, 65, 72,
+#               79, and 96 have typos).
+# Millero, 1983:
+#       Millero, Frank J., Influence of pressure on chemical processes in
+#       the sea. Chapter 43 in Chemical Oceanography, eds. Riley, J. P. and
+#       Chester, R., Academic Press, 1983.
+#       TYPO: p. 51, eq. 94: the value -26.69 should be -25.59
+#       TYPO: p. 51, eq. 95: the term .1700t should be .0800t
+#       these two are necessary to match the values given in Table 43.24
+# Millero, 1979:
+#       Millero, F. J., The thermodynamics of the carbon dioxide system
+#       in seawater, Geochemica et Cosmochemica Acta 43:1651-1661, 1979.
+#       See table 5 and eqs. 7, 7a, 7b on pp. 1656-1657.
+# Takahashi et al, in GEOSECS Pacific Expedition, v. 3, 1982.
+#       TYPO: the pressure dependence of K2 should have a 16.4, not 26.4
+#       This matches the GEOSECS results and is in Edmond and Gieskes.
+# Culberson, C. H. and Pytkowicz, R. M., Effect of pressure on carbonic acid,
+#       boric acid, and the pH of seawater, Limnology and Oceanography
+#       13:403-417, 1968.
+# Edmond, John M. and Gieskes, J. M. T. M., The calculation of the degree of
+#       seawater with respect to calcium carbonate under in situ conditions,
+#       Geochemica et Cosmochemica Acta, 34:1261-1291, 1970.
+#****************************************************************************
+# These references often disagree and give different fits for the same thing.
+# They are not always just an update either; that is, Millero, 1995 may agree
+#       with Millero, 1979, but differ from Millero, 1983.
+# For WhichKs# = 7 (Peng choice) I used the same factors for KW, KP1, KP2,
+#       KP3, and KSi as for the other cases. Peng et al didn't consider the
+#       case of P different from 0. GEOSECS did consider pressure, but didn't
+#       include Phos, Si, or OH, so including the factors here won't matter.
+# For WhichKs# = 8 (freshwater) the values are from Millero, 1983 (for K1, K2,
+#       and KW). The other aren't used (TB = TS = TF = TP = TSi = 0.), so
+#       including the factors won't matter.
+#****************************************************************************
+#       deltaVs are in cm3/mole
+#       Kappas are in cm3/mole/bar
+#****************************************************************************
 
-# #***************************************************************************
-# #CorrectKsForPressureNow:
-# # Currently: For WhichKs# = 1 to 7, all Ks (except KF and KS, which are on
-# #       the free scale) are on the SWS scale.
-# #       For WhichKs# = 6, KW set to 0, KP1, KP2, KP3, KSi don't matter.
-# #       For WhichKs# = 8, K1, K2, and KW are on the "pH" pH scale
-# #       (the pH scales are the same in this case); the other Ks don't matter.
-# #
-# #
-# # No salinity dependence is given for the pressure coefficients here.
-# # It is assumed that the salinity is at or very near Sali = 35.
-# # These are valid for the SWS pH scale, but the difference between this and
-# # the total only yields a difference of .004 pH units at 1000 bars, much
-# # less than the uncertainties in the values.
-# #****************************************************************************
-# # The sources used are:
-# # Millero, 1995:
-# #       Millero, F. J., Thermodynamics of the carbon dioxide system in the
-# #       oceans, Geochemica et Cosmochemica Acta 59:661-677, 1995.
-# #       See table 9 and eqs. 90-92, p. 675.
-# #       TYPO: a factor of 10^3 was left out of the definition of Kappa
-# #       TYPO: the value of R given is incorrect with the wrong units
-# #       TYPO: the values of the a's for H2S and H2O are from the 1983
-# #                values for fresh water
-# #       TYPO: the value of a1 for B(OH)3 should be +.1622
-# #        Table 9 on p. 675 has no values for Si.
-# #       There are a variety of other typos in Table 9 on p. 675.
-# #       There are other typos in the paper, and most of the check values
-# #       given don't check.
-# # Millero, 1992:
-# #       Millero, Frank J., and Sohn, Mary L., Chemical Oceanography,
-# #       CRC Press, 1992. See chapter 6.
-# #       TYPO: this chapter has numerous typos (eqs. 36, 52, 56, 65, 72,
-# #               79, and 96 have typos).
-# # Millero, 1983:
-# #       Millero, Frank J., Influence of pressure on chemical processes in
-# #       the sea. Chapter 43 in Chemical Oceanography, eds. Riley, J. P. and
-# #       Chester, R., Academic Press, 1983.
-# #       TYPO: p. 51, eq. 94: the value -26.69 should be -25.59
-# #       TYPO: p. 51, eq. 95: the term .1700t should be .0800t
-# #       these two are necessary to match the values given in Table 43.24
-# # Millero, 1979:
-# #       Millero, F. J., The thermodynamics of the carbon dioxide system
-# #       in seawater, Geochemica et Cosmochemica Acta 43:1651-1661, 1979.
-# #       See table 5 and eqs. 7, 7a, 7b on pp. 1656-1657.
-# # Takahashi et al, in GEOSECS Pacific Expedition, v. 3, 1982.
-# #       TYPO: the pressure dependence of K2 should have a 16.4, not 26.4
-# #       This matches the GEOSECS results and is in Edmond and Gieskes.
-# # Culberson, C. H. and Pytkowicz, R. M., Effect of pressure on carbonic acid,
-# #       boric acid, and the pH of seawater, Limnology and Oceanography
-# #       13:403-417, 1968.
-# # Edmond, John M. and Gieskes, J. M. T. M., The calculation of the degree of
-# #       seawater with respect to calcium carbonate under in situ conditions,
-# #       Geochemica et Cosmochemica Acta, 34:1261-1291, 1970.
-# #****************************************************************************
-# # These references often disagree and give different fits for the same thing.
-# # They are not always just an update either; that is, Millero, 1995 may agree
-# #       with Millero, 1979, but differ from Millero, 1983.
-# # For WhichKs# = 7 (Peng choice) I used the same factors for KW, KP1, KP2,
-# #       KP3, and KSi as for the other cases. Peng et al didn't consider the
-# #       case of P different from 0. GEOSECS did consider pressure, but didn't
-# #       include Phos, Si, or OH, so including the factors here won't matter.
-# # For WhichKs# = 8 (freshwater) the values are from Millero, 1983 (for K1, K2,
-# #       and KW). The other aren't used (TB = TS = TF = TP = TSi = 0.), so
-# #       including the factors won't matter.
-# #****************************************************************************
-# #       deltaVs are in cm3/mole
-# #       Kappas are in cm3/mole/bar
-# #****************************************************************************
-#
-# #CorrectK1K2KBForPressure:
-# deltaV    = fill(NaN,ntps); Kappa     = fill(NaN,ntps);
-# lnK1fac   = fill(NaN,ntps); lnK2fac   = fill(NaN,ntps);
-# lnKBfac   = fill(NaN,ntps);
-# F = @. (WhichKs == 8);
-# if any(F)
-#     #***PressureEffectsOnK1inFreshWater:
-#     #               This is from Millero, 1983.
-#     deltaV[F]  = -30.54 + 0.1849 .*TempC[F] - 0.0023366.*TempC[F].^2;
-#     Kappa[F]   = (-6.22 + 0.1368 .*TempC[F] - 0.001233 .*TempC[F].^2)./1000;
-#     lnK1fac[F] = (-deltaV[F] + 0.5.*Kappa[F].*Pbar[F]).*Pbar[F]./RT[F];
-#     #***PressureEffectsOnK2inFreshWater:
-#     #               This is from Millero, 1983.
-#     deltaV[F]  = -29.81 + 0.115.*TempC[F] - 0.001816.*TempC[F].^2;
-#     Kappa[F]   = (-5.74 + 0.093.*TempC[F] - 0.001896.*TempC[F].^2)./1000;
-#     lnK2fac[F] = (-deltaV[F] + 0.5.*Kappa[F].*Pbar[F]).*Pbar[F]./RT[F];
-#     lnKBfac[F] = 0 ;#; this doesn't matter since TB = 0 for this case
-# end
-# F = @. (WhichKs == 6 | WhichKs==7);
-# if any(F)
-#     #               GEOSECS Pressure Effects On K1, K2, KB (on the NBS scale)
-#     #               Takahashi et al, GEOSECS Pacific Expedition v. 3, 1982 quotes
-#     #               Culberson and Pytkowicz, L and O 13:403-417, 1968:
-#     #               but the fits are the same as those in
-#     #               Edmond and Gieskes, GCA, 34:1261-1291, 1970
-#     #               who in turn quote Li, personal communication
-#     lnK1fac[F] = (24.2 - 0.085.*TempC[F]).*Pbar[F]./RT[F];
-#     lnK2fac[F] = (16.4 - 0.04 .*TempC[F]).*Pbar[F]./RT[F];
-#     #               Takahashi et al had 26.4, but 16.4 is from Edmond and Gieskes
-#     #               and matches the GEOSECS results
-#     lnKBfac[F] = (27.5 - 0.095.*TempC[F]).*Pbar[F]./RT[F];
-# end
-# F = @. (WhichKs != 6) & (WhichKs != 7) & (WhichKs != 8)
-# if any(F)
-#     #***PressureEffectsOnK1:
-#     #               These are from Millero, 1995.
-#     #               They are the same as Millero, 1979 and Millero, 1992.
-#     #               They are from data of Culberson and Pytkowicz, 1968.
-#     deltaV[F]  = -25.5 + 0.1271.*TempC[F];
-#     #                 'deltaV = deltaV - .151.*(Sali - 34.8); # Millero, 1979
-#     Kappa[F]   = (-3.08 + 0.0877.*TempC[F])./1000;
-#     #                 'Kappa = Kappa  - .578.*(Sali - 34.8)/1000.; # Millero, 1979
-#  	lnK1fac[F] = (-deltaV[F] + 0.5.*Kappa[F].*Pbar[F]).*Pbar[F]./RT[F];
-#     #               The fits given in Millero, 1983 are somewhat different.
-#
-#     #***PressureEffectsOnK2:
-#     #               These are from Millero, 1995.
-#     #               They are the same as Millero, 1979 and Millero, 1992.
-#     #               They are from data of Culberson and Pytkowicz, 1968.
-#     deltaV[F]  = -15.82 - 0.0219.*TempC[F];
-#     #                  'deltaV = deltaV + .321.*(Sali - 34.8); # Millero, 1979
-#     Kappa[F]   = (1.13 - 0.1475.*TempC[F])./1000;
-#     #                 'Kappa = Kappa - .314.*(Sali - 34.8)./1000: # Millero, 1979
-# 	lnK2fac[F] = (-deltaV[F] + 0.5.*Kappa[F].*Pbar[F]).*Pbar[F]./RT[F];
-#     #               The fit given in Millero, 1983 is different.
-#     #               Not by a lot for deltaV, but by much for Kappa. #
-#
-#     #***PressureEffectsOnKB:
-#     #               This is from Millero, 1979.
-#     #               It is from data of Culberson and Pytkowicz, 1968.
-#     deltaV[F]  = -29.48 + 0.1622.*TempC[F] - 0.002608.*TempC[F].^2;
-#     #               Millero, 1983 has:
-#     #                 'deltaV = -28.56 + .1211.*TempCi - .000321.*TempCi.*TempCi
-#     #               Millero, 1992 has:
-#     #                 'deltaV = -29.48 + .1622.*TempCi + .295.*(Sali - 34.8)
-#     #               Millero, 1995 has:
-#     #                 'deltaV = -29.48 - .1622.*TempCi - .002608.*TempCi.*TempCi
-#     #                 'deltaV = deltaV + .295.*(Sali - 34.8); # Millero, 1979
-#     Kappa[F]   = -2.84./1000; # Millero, 1979
-#     #               Millero, 1992 and Millero, 1995 also have this.
-#     #                 'Kappa = Kappa + .354.*(Sali - 34.8)./1000: # Millero,1979
-#     #               Millero, 1983 has:
-#     #                 'Kappa = (-3 + .0427.*TempCi)./1000
-#     lnKBfac[F] = (-deltaV[F] + 0.5.*Kappa[F].*Pbar[F]).*Pbar[F]./RT[F];
-# end
-#
-# # CorrectKWForPressure:
-# lnKWfac   = fill(NaN,ntps);
-# F = @. (WhichKs == 8);
-# if any(F)
-#     # PressureEffectsOnKWinFreshWater:
-#     #               This is from Millero, 1983.
-#     deltaV[F]  =  -25.6 + 0.2324.*TempC[F] - 0.0036246.*TempC[F].^2;
-#     Kappa[F]   = (-7.33 + 0.1368.*TempC[F] - 0.001233 .*TempC[F].^2)./1000;
-#  	lnKWfac[F] = (-deltaV[F] + 0.5.*Kappa[F].*Pbar[F]).*Pbar[F]./RT[F];
-#
-#     #               NOTE the temperature dependence of KappaK1 and KappaKW
-#     #               for fresh water in Millero, 1983 are the same.
-# end
-# F=(WhichKs!=8);
-# if any(F)
-#     # GEOSECS doesn't include OH term, so this won't matter.
-#     # Peng et al didn't include pressure, but here I assume that the KW correction
-#     #       is the same as for the other seawater cases.
-#     # PressureEffectsOnKW:
-#     #               This is from Millero, 1983 and his programs CO2ROY(T).BAS.
-#     deltaV[F]  = -20.02 + 0.1119.*TempC[F] - 0.001409.*TempC[F].^2;
-#     #               Millero, 1992 and Millero, 1995 have:
-#     Kappa[F]   = (-5.13 + 0.0794.*TempC[F])./1000; # Millero, 1983
-#     #               Millero, 1995 has this too, but Millero, 1992 is different.
-# 	lnKWfac[F] = (-deltaV[F] + 0.5.*Kappa[F].*Pbar[F]).*Pbar[F]./RT[F];
-#     #               Millero, 1979 does not list values for these.
-# end
-#
-# # PressureEffectsOnKF:
-# #       This is from Millero, 1995, which is the same as Millero, 1983.
-# #       It is assumed that KF is on the free pH scale.
-# deltaV = -9.78 - 0.009.*TempC - 0.000942.*TempC.^2;
-# Kappa = (-3.91 + 0.054.*TempC)./1000;
-# lnKFfac = (-deltaV + 0.5.*Kappa.*Pbar).*Pbar./RT;
-# # PressureEffectsOnKS:
-# #       This is from Millero, 1995, which is the same as Millero, 1983.
-# #       It is assumed that KS is on the free pH scale.
-# deltaV = -18.03 + 0.0466.*TempC + 0.000316.*TempC.^2;
-# Kappa = (-4.53 + 0.09.*TempC)./1000;
-# lnKSfac = (-deltaV + 0.5.*Kappa.*Pbar).*Pbar./RT;
-#
-# # CorrectKP1KP2KP3KSiForPressure:
-# # These corrections don't matter for the GEOSECS choice (WhichKs# = 6) and
-# #       the freshwater choice (WhichKs# = 8). For the Peng choice I assume
-# #       that they are the same as for the other choices (WhichKs# = 1 to 5).
-# # The corrections for KP1, KP2, and KP3 are from Millero, 1995, which are the
-# #       same as Millero, 1983.
-# # PressureEffectsOnKP1:
-# deltaV = -14.51 + 0.1211.*TempC - 0.000321.*TempC.^2;
-# Kappa  = (-2.67 + 0.0427.*TempC)./1000;
-# lnKP1fac = (-deltaV + 0.5.*Kappa.*Pbar).*Pbar./RT;
-# # PressureEffectsOnKP2:
-# deltaV = -23.12 + 0.1758.*TempC - 0.002647.*TempC.^2;
-# Kappa  = (-5.15 + 0.09  .*TempC)./1000;
-# lnKP2fac = (-deltaV + 0.5.*Kappa.*Pbar).*Pbar./RT;
-# # PressureEffectsOnKP3:
-# deltaV = -26.57 + 0.202 .*TempC - 0.003042.*TempC.^2;
-# Kappa  = (-4.08 + 0.0714.*TempC)./1000;
-# lnKP3fac = (-deltaV + 0.5.*Kappa.*Pbar).*Pbar./RT;
-# # PressureEffectsOnKSi:
-# #  The only mention of this is Millero, 1995 where it is stated that the
-# #    values have been estimated from the values of boric acid. HOWEVER,
-# #    there is no listing of the values in the table.
-# #    I used the values for boric acid from above.
-# deltaV = -29.48 + 0.1622.*TempC - 0.002608.*TempC.^2;
-# Kappa  = -2.84./1000;
-# lnKSifac = (-deltaV + 0.5.*Kappa.*Pbar).*Pbar./RT;
-#
-# # CorrectKsForPressureHere:
-# K1fac  = exp(lnK1fac);  K1  = K1 .*K1fac;
-# K2fac  = exp(lnK2fac);  K2  = K2 .*K2fac;
-# KWfac  = exp(lnKWfac);  KW  = KW .*KWfac;
-# KBfac  = exp(lnKBfac);  KB  = KB .*KBfac;
-# KFfac  = exp(lnKFfac);  KF  = KF .*KFfac;
-# KSfac  = exp(lnKSfac);  KS  = KS .*KSfac;
-# KP1fac = exp(lnKP1fac); KP1 = KP1.*KP1fac;
-# KP2fac = exp(lnKP2fac); KP2 = KP2.*KP2fac;
-# KP3fac = exp(lnKP3fac); KP3 = KP3.*KP3fac;
-# KSifac = exp(lnKSifac); KSi = KSi.*KSifac;
-#
-# # CorrectpHScaleConversionsForPressure:
-# # fH has been assumed to be independent of pressure.
-# SWStoTOT  = (1 + TS./KS)./(1 + TS./KS + TF./KF);
-# FREEtoTOT =  1 + TS./KS;
-#
-# #  The values KS and KF are already pressure-corrected, so the pH scale
-# #  conversions are now valid at pressure.
-#
-# # FindpHScaleConversionFactor:
-# # this is the scale they will be put on
-# pHfactor  = fill(NaN,ntps);
-# F=(pHScale==1); #Total
-# pHfactor[F] = SWStoTOT[F];
-# F=(pHScale==2); #SWS, they are all on this now
-# pHfactor[F] = 1;
-# F=(pHScale==3); #pHfree
-# pHfactor[F] = SWStoTOT[F]./FREEtoTOT[F];
-# F=(pHScale==4); #pHNBS
-# pHfactor[F] = fH[F];
-#
-# # ConvertFromSWSpHScaleToChosenScale:
-# K1  = K1.* pHfactor; K2  = K2.* pHfactor;
-# KW  = KW.* pHfactor; KB  = KB.* pHfactor;
-# KP1 = KP1.*pHfactor; KP2 = KP2.*pHfactor;
-# KP3 = KP3.*pHfactor; KSi = KSi.*pHfactor;
-#
-# # CalculateFugacityConstants:
-# # This assumes that the pressure is at one atmosphere, or close to it.
-# # Otherwise, the Pres term in the exponent affects the results.
-# #       Weiss, R. F., Marine Chemistry 2:203-215, 1974.
-# #       Delta and B in cm3/mol
-# FugFac=ones[ntps,1];
-# Delta = (57.7 - 0.118.*TempK);
-# b = -1636.75 + 12.0408.*TempK - 0.0327957.*TempK.^2 + 3.16528.*0.00001.*TempK.^3;
-# # For a mixture of CO2 and air at 1 atm (at low CO2 concentrations);
-# P1atm = 1.01325; # in bar
-# FugFac = exp((b + 2.*Delta).*P1atm./RT);
-# F = @. (WhichKs == 6 | WhichKs==7); # GEOSECS and Peng assume pCO2 = fCO2, or FugFac = 1
-# FugFac[F] = 1;
-# # CalculateVPFac:
-# # Weiss, R. F., and Price, B. A., Nitrous oxide solubility in water and
-# #       seawater, Marine Chemistry 8:347-359, 1980.
-# # They fit the data of Goff and Gratch (1946) with the vapor pressure
-# #       lowering by sea salt as given by Robinson (1954).
-# # This fits the more complicated Goff and Gratch, and Robinson equations
-# #       from 273 to 313 deg K and 0 to 40 Sali with a standard error
-# #       of .015#, about 5 uatm over this range.
-# # This may be on IPTS-29 since they didn't mention the temperature scale,
-# #       and the data of Goff and Gratch came before IPTS-48.
-# # The references are:
-# # Goff, J. A. and Gratch, S., Low pressure properties of water from -160 deg
-# #       to 212 deg F, Transactions of the American Society of Heating and
-# #       Ventilating Engineers 52:95-122, 1946.
-# # Robinson, Journal of the Marine Biological Association of the U. K.
-# #       33:449-455, 1954.
-# #       This is eq. 10 on p. 350.
-# #       This is in atmospheres.
-# VPWP = exp(24.4543 - 67.4509.*(100./TempK) - 4.8489.*log(TempK./100));
-# VPCorrWP = exp(-0.000544.*Sal);
-# VPSWWP = VPWP.*VPCorrWP;
-# VPFac = 1 - VPSWWP; # this assumes 1 atmosphere
+#CorrectK1K2KBForPressure:
+deltaV  = fill(NaN,ntps); Kappa   = fill(NaN,ntps)
+lnK1fac = fill(NaN,ntps); lnK2fac = fill(NaN,ntps)
+lnKBfac = fill(NaN,ntps);
+F = @. (WhichKs == 8)
+if any(F)
+    #***PressureEffectsOnK1inFreshWater:
+    #               This is from Millero, 1983.
+    deltaV[F]  = @. -30.54 + 0.1849TempC[F] - 0.0023366TempC[F]^2
+    Kappa[F]   = @. (-6.22 + 0.1368TempC[F] - 0.001233TempC[F]^2) / 1000
+    lnK1fac[F] = @. (-deltaV[F] + 0.5Kappa[F]*Pbar[F])*Pbar[F] / RT[F]
+    #***PressureEffectsOnK2inFreshWater:
+    #               This is from Millero, 1983.
+    deltaV[F]  = @. -29.81 + 0.115TempC[F] - 0.001816TempC[F]^2
+    Kappa[F]   = @. (-5.74 + 0.093TempC[F] - 0.001896TempC[F]^2) / 1000
+    lnK2fac[F] = @. (-deltaV[F] + 0.5Kappa[F]*Pbar[F])*Pbar[F] / RT[F]
+    lnKBfac[F] .= 0 # this doesn't matter since TB = 0 for this case
+end
+F = @. (WhichKs == 6) | (WhichKs == 7)
+if any(F)
+    #               GEOSECS Pressure Effects On K1, K2, KB (on the NBS scale)
+    #               Takahashi et al, GEOSECS Pacific Expedition v. 3, 1982 quotes
+    #               Culberson and Pytkowicz, L and O 13:403-417, 1968:
+    #               but the fits are the same as those in
+    #               Edmond and Gieskes, GCA, 34:1261-1291, 1970
+    #               who in turn quote Li, personal communication
+    lnK1fac[F] = @. (24.2 - 0.085TempC[F])*Pbar[F]/RT[F]
+    lnK2fac[F] = @. (16.4 - 0.04TempC[F])*Pbar[F]/RT[F]
+    #               Takahashi et al had 26.4, but 16.4 is from Edmond and Gieskes
+    #               and matches the GEOSECS results
+    lnKBfac[F] = @. (27.5 - 0.095TempC[F])*Pbar[F]/RT[F]
+end
+F = @. (WhichKs != 6) & (WhichKs != 7) & (WhichKs != 8)
+if any(F)
+    #***PressureEffectsOnK1:
+    #               These are from Millero, 1995.
+    #               They are the same as Millero, 1979 and Millero, 1992.
+    #               They are from data of Culberson and Pytkowicz, 1968.
+    deltaV[F]  = @. -25.5 + 0.1271TempC[F]
+    #                 'deltaV = deltaV - .151.*(Sali - 34.8); # Millero, 1979
+    Kappa[F]   = @. (-3.08 + 0.0877TempC[F]) / 1000
+    #                 'Kappa = Kappa  - .578.*(Sali - 34.8)/1000.; # Millero, 1979
+ 	lnK1fac[F] = @. (-deltaV[F] + 0.5Kappa[F]*Pbar[F])*Pbar[F] / RT[F]
+    #               The fits given in Millero, 1983 are somewhat different.
+
+    #***PressureEffectsOnK2:
+    #               These are from Millero, 1995.
+    #               They are the same as Millero, 1979 and Millero, 1992.
+    #               They are from data of Culberson and Pytkowicz, 1968.
+    deltaV[F]  = @. -15.82 - 0.0219TempC[F]
+    #                  'deltaV = deltaV + .321.*(Sali - 34.8); # Millero, 1979
+    Kappa[F]   = @. (1.13 - 0.1475TempC[F]) / 1000
+    #                 'Kappa = Kappa - .314.*(Sali - 34.8)./1000: # Millero, 1979
+	lnK2fac[F] = @. (-deltaV[F] + 0.5Kappa[F]*Pbar[F])*Pbar[F] / RT[F]
+    #               The fit given in Millero, 1983 is different.
+    #               Not by a lot for deltaV, but by much for Kappa. #
+
+    #***PressureEffectsOnKB:
+    #               This is from Millero, 1979.
+    #               It is from data of Culberson and Pytkowicz, 1968.
+    deltaV[F]  = @. -29.48 + 0.1622TempC[F] - 0.002608TempC[F]^2
+    #               Millero, 1983 has:
+    #                 'deltaV = -28.56 + .1211.*TempCi - .000321.*TempCi.*TempCi
+    #               Millero, 1992 has:
+    #                 'deltaV = -29.48 + .1622.*TempCi + .295.*(Sali - 34.8)
+    #               Millero, 1995 has:
+    #                 'deltaV = -29.48 - .1622.*TempCi - .002608.*TempCi.*TempCi
+    #                 'deltaV = deltaV + .295.*(Sali - 34.8); # Millero, 1979
+    Kappa[F]   .= -2.84/1000 # Millero, 1979
+    #               Millero, 1992 and Millero, 1995 also have this.
+    #                 'Kappa = Kappa + .354.*(Sali - 34.8)./1000: # Millero,1979
+    #               Millero, 1983 has:
+    #                 'Kappa = (-3 + .0427.*TempCi)./1000
+    lnKBfac[F] = @. (-deltaV[F] + 0.5Kappa[F]*Pbar[F])*Pbar[F] / RT[F]
+end
+
+# CorrectKWForPressure:
+lnKWfac = fill(NaN,ntps)
+F = @. (WhichKs == 8)
+if any(F)
+    # PressureEffectsOnKWinFreshWater:
+    #               This is from Millero, 1983.
+    deltaV[F]  = @.  -25.6 + 0.2324TempC[F] - 0.0036246TempC[F]^2
+    Kappa[F]   = @. (-7.33 + 0.1368TempC[F] - 0.001233TempC[F]^2) / 1000
+ 	lnKWfac[F] = @. (-deltaV[F] + 0.5Kappa[F]*Pbar[F])*Pbar[F] / RT[F]
+
+    #               NOTE the temperature dependence of KappaK1 and KappaKW
+    #               for fresh water in Millero, 1983 are the same.
+end
+F = @. (WhichKs != 8)
+if any(F)
+    # GEOSECS doesn't include OH term, so this won't matter.
+    # Peng et al didn't include pressure, but here I assume that the KW correction
+    #       is the same as for the other seawater cases.
+    # PressureEffectsOnKW:
+    #               This is from Millero, 1983 and his programs CO2ROY(T).BAS.
+    deltaV[F]  = @. -20.02 + 0.1119TempC[F] - 0.001409TempC[F]^2
+    #               Millero, 1992 and Millero, 1995 have:
+    Kappa[F]   = @. (-5.13 + 0.0794TempC[F]) / 1000 # Millero, 1983
+    #               Millero, 1995 has this too, but Millero, 1992 is different.
+	lnKWfac[F] = @. (-deltaV[F] + 0.5Kappa[F]*Pbar[F])*Pbar[F] / RT[F]
+    #               Millero, 1979 does not list values for these.
+end
+
+# PressureEffectsOnKF:
+#       This is from Millero, 1995, which is the same as Millero, 1983.
+#       It is assumed that KF is on the free pH scale.
+deltaV = @. -9.78 - 0.009TempC - 0.000942TempC^2
+Kappa = @. (-3.91 + 0.054TempC)/1000
+lnKFfac = @. (-deltaV + 0.5Kappa*Pbar)*Pbar/RT
+# PressureEffectsOnKS:
+#       This is from Millero, 1995, which is the same as Millero, 1983.
+#       It is assumed that KS is on the free pH scale.
+deltaV = @. -18.03 + 0.0466TempC + 0.000316TempC^2
+Kappa = @. (-4.53 + 0.09TempC)/1000
+lnKSfac = @. (-deltaV + 0.5Kappa*Pbar)*Pbar/RT
+
+# CorrectKP1KP2KP3KSiForPressure:
+# These corrections don't matter for the GEOSECS choice (WhichKs# = 6) and
+#       the freshwater choice (WhichKs# = 8). For the Peng choice I assume
+#       that they are the same as for the other choices (WhichKs# = 1 to 5).
+# The corrections for KP1, KP2, and KP3 are from Millero, 1995, which are the
+#       same as Millero, 1983.
+# PressureEffectsOnKP1:
+deltaV = @. -14.51 + 0.1211TempC - 0.000321TempC^2
+Kappa  = @. (-2.67 + 0.0427TempC) / 1000
+lnKP1fac = @. (-deltaV +  0.5Kappa*Pbar) *Pbar / RT
+# PressureEffectsOnKP2:
+deltaV = @. -23.12 + 0.1758TempC - 0.002647TempC^2
+Kappa  = @. (-5.15 + 0.09TempC) / 1000
+lnKP2fac = @. (-deltaV +  0.5Kappa*Pbar) *Pbar / RT
+# PressureEffectsOnKP3:
+deltaV = @. -26.57 + 0.202TempC - 0.003042TempC^2
+Kappa  = @. (-4.08 + 0.0714TempC) / 1000
+lnKP3fac = @. (-deltaV +  0.5Kappa*Pbar) *Pbar / RT
+# PressureEffectsOnKSi:
+#  The only mention of this is Millero, 1995 where it is stated that the
+#    values have been estimated from the values of boric acid. HOWEVER,
+#    there is no listing of the values in the table.
+#    I used the values for boric acid from above.
+deltaV = @. -29.48 + 0.1622TempC - 0.002608TempC^2
+Kappa  .= -2.84 / 1000
+lnKSifac = @. (-deltaV +  0.5Kappa*Pbar) *Pbar / RT
+
+# CorrectKsForPressureHere:
+K1fac  = exp.(lnK1fac);  K1  = K1 .*K1fac
+K2fac  = exp.(lnK2fac);  K2  = K2 .*K2fac
+KWfac  = exp.(lnKWfac);  KW  = KW .*KWfac
+KBfac  = exp.(lnKBfac);  KB  = KB .*KBfac
+KFfac  = exp.(lnKFfac);  KF  = KF .*KFfac
+KSfac  = exp.(lnKSfac);  KS  = KS .*KSfac
+KP1fac = exp.(lnKP1fac); KP1 = KP1.*KP1fac
+KP2fac = exp.(lnKP2fac); KP2 = KP2.*KP2fac
+KP3fac = exp.(lnKP3fac); KP3 = KP3.*KP3fac
+KSifac = exp.(lnKSifac); KSi = KSi.*KSifac
+
+# CorrectpHScaleConversionsForPressure:
+# fH has been assumed to be independent of pressure.
+SWStoTOT  = @. (1 + TS/KS) / (1 + TS/KS + TF/KF)
+FREEtoTOT = @. 1 + TS/KS
+
+#  The values KS and KF are already pressure-corrected, so the pH scale
+#  conversions are now valid at pressure.
+
+# FindpHScaleConversionFactor:
+# this is the scale they will be put on
+pHfactor = fill(NaN,ntps);
+F = @. (pHScale == 1) #Total
+pHfactor[F] .= SWStoTOT[F]
+F = @. (pHScale == 2) #SWS, they are all on this now
+pHfactor[F] .= 1.0
+F = @. (pHScale == 3) #pHfree
+pHfactor[F] = SWStoTOT[F]./FREEtoTOT[F]
+F = @. (pHScale == 4) #pHNBS
+pHfactor[F] .= fH[F]
+
+# ConvertFromSWSpHScaleToChosenScale:
+K1  = K1.* pHfactor; K2  = K2.* pHfactor;
+KW  = KW.* pHfactor; KB  = KB.* pHfactor;
+KP1 = KP1.*pHfactor; KP2 = KP2.*pHfactor;
+KP3 = KP3.*pHfactor; KSi = KSi.*pHfactor;
+
+# CalculateFugacityConstants:
+# This assumes that the pressure is at one atmosphere, or close to it.
+# Otherwise, the Pres term in the exponent affects the results.
+#       Weiss, R. F., Marine Chemistry 2:203-215, 1974.
+#       Delta and B in cm3/mol
+FugFac=ones(ntps)
+Delta = @. 57.7 - 0.118TempK
+b = @. -1636.75 + 12.0408TempK - 0.0327957TempK^2 + 3.16528*0.00001TempK^3
+# For a mixture of CO2 and air at 1 atm (at low CO2 concentrations);
+P1atm = 1.01325 # in bar
+FugFac = @. exp((b + 2Delta)*P1atm / RT)
+F = @. (WhichKs == 6) | (WhichKs == 7) # GEOSECS and Peng assume pCO2 = fCO2, or FugFac = 1
+FugFac[F] .= 1.0
+# CalculateVPFac:
+# Weiss, R. F., and Price, B. A., Nitrous oxide solubility in water and
+#       seawater, Marine Chemistry 8:347-359, 1980.
+# They fit the data of Goff and Gratch (1946) with the vapor pressure
+#       lowering by sea salt as given by Robinson (1954).
+# This fits the more complicated Goff and Gratch, and Robinson equations
+#       from 273 to 313 deg K and 0 to 40 Sali with a standard error
+#       of .015#, about 5 uatm over this range.
+# This may be on IPTS-29 since they didn't mention the temperature scale,
+#       and the data of Goff and Gratch came before IPTS-48.
+# The references are:
+# Goff, J. A. and Gratch, S., Low pressure properties of water from -160 deg
+#       to 212 deg F, Transactions of the American Society of Heating and
+#       Ventilating Engineers 52:95-122, 1946.
+# Robinson, Journal of the Marine Biological Association of the U. K.
+#       33:449-455, 1954.
+#       This is eq. 10 on p. 350.
+#       This is in atmospheres.
+VPWP = @. exp(24.4543 - 67.4509*(100/TempK) - 4.8489*log(TempK/100))
+VPCorrWP = @. exp(-0.000544Sal)
+VPSWWP = VPWP.*VPCorrWP
+VPFac = @. 1 - VPSWWP # this assumes 1 atmosphere
 end # end nested function
 
 
@@ -1848,8 +1849,8 @@ end # end nested function
 #     # '       same as in Millero, GCA 43:1651-1661, 1979, but Millero, GCA 1995
 #     # '       has typos (-.5304, -.3692, and 10^3 for Kappa factor)
 #     deltaVKCa = -48.76 + 0.5304.*TempC;
-#     KappaKCa  = (-11.76 + 0.3692.*TempC)./1000;
-#     lnKCafac  = (-deltaVKCa + 0.5.*KappaKCa.*Pbar).*Pbar./RT;
+#     KappaKCa  = (-11.76 + 0.3692.*TempC) / 1000
+#     lnKCafac  = (-deltaVKCa + 0.5.*KappaKCa.*Pbar) *Pbar / RT
 #     KCa       = KCa.*exp(lnKCafac);
 #     # PressureCorrectionForAragonite:
 #     # '       Millero, Geochemica et Cosmochemica Acta 43:1651-1661, 1979,
@@ -1857,7 +1858,7 @@ end # end nested function
 #     # '       and 10^3 for Kappa factor)
 #     deltaVKAr = deltaVKCa + 2.8;
 #     KappaKAr  = KappaKCa;
-#     lnKArfac  = (-deltaVKAr + 0.5.*KappaKAr.*Pbar).*Pbar./RT;
+#     lnKArfac  = (-deltaVKAr + 0.5.*KappaKAr.*Pbar) *Pbar / RT
 #     KAr       = KAr.*exp(lnKArfac);
 # end
 # F = @. (WhichKs == 6 | WhichKs==7);
