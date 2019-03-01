@@ -1,4 +1,17 @@
-name = "CO2System.jl"
+name = "CO2System"
 uuid = "f00bc630-3c04-11e9-22cb-9d48d87370ce"
-authors = ["Matthew Humphreys <m.p.humphreys@cantab.net>"]
+authors = [# CO2SYS v2-jl for Julia:
+           "Matthew Humphreys <m.p.humphreys@cantab.net>",
+           # CO2SYS v2 for MATLAB:
+           "James Orr",
+           "Jean-Marie Epitalon",
+           "Andrew Dickson",
+           "Jean-Pierre Gattuso",
+           # CO2SYS v1 for MATLAB:
+           "Steven van Heuven",
+           "Denis Pierrot",
+           "James Rae",
+           # Original CO2SYS for DOS:
+           "Ernie Lewis",
+           "Doug Wallace"]
 version = "2.0.5-jl1"
