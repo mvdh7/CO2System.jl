@@ -1,4 +1,4 @@
-module CO2SYSeg2
+module CO2SystemExample2
 
 println(" ")
 println("Here is another example:")
@@ -25,8 +25,8 @@ k1k2c   =    4    # Choice of H2CO3 and HCO3- dissociation constants K1 and K2 (
 kso4c   =    1    # Choice of HSO4- dissociation constants KSO4 ("1" means "Dickson")
 
 # Import CO2SYS
-include("../src/CO2SYS.jl")
-using .CO2SYSjl
+include("../src/CO2System.jl")
+using .CO2System
 
 # Do the calculation. See CO2SYS's help for syntax and output format
 A = CO2SYS(par1,par2,par1type,par2type,sal,tempin,tempout,presin,presout,
@@ -35,7 +35,7 @@ A = CO2SYS(par1,par2,par1type,par2type,sal,tempin,tempout,presin,presout,
 println("The answer:") # It is the 38th element of the output of CO2SYS (pHoutSWS)
 println(A[38])
 println(" ")
-println("See CO2SYSexample2.jl to see what the syntax for this calculation was.")
+println("See CO2SystemExample2.jl to see what the syntax for this calculation was.")
 println(" ")
 
-end # module CO2SYSeg2
+end # module CO2SystemExample2
