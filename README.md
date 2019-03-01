@@ -1,8 +1,28 @@
 # CO2SYS.jl
 
-**Work in progress:** porting CO2SYS v2.0.5 into Julia.
+Port of CO2SYS v2.0.5 into Julia.
 
-Original README for MATLAB version follows.
+Installation:
+
+```julia
+(v1.1) pkg> add https://github.com/mvdh7/CO2System.jl
+```
+
+Usage:
+
+```julia
+using CO2System
+
+DATA, HEADERS, NICEHEADERS =
+    CO2SYS(PAR1,PAR2,PAR1TYPE,PAR2TYPE,SAL,TEMPIN,TEMPOUT,PRESIN,PRESOUT,
+    SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS)
+```
+
+Inputs can be arrays or scalar or a mixture, just like the MATLAB version.
+
+Outputs also correspond as closely as possible to their MATLAB equivalents.
+
+Original README for the MATLAB version follows.
 
 <hr />
 
