@@ -1,4 +1,4 @@
-# CO2SYS.jl
+# CO2System.jl
 
 Port of CO2SYS v2.0.5 into Julia v1.1.
 
@@ -18,9 +18,7 @@ DATA, HEADERS, NICEHEADERS =
     SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS)
 ```
 
-Inputs can be arrays or scalar or a mixture, just like the MATLAB version.
-
-Outputs also correspond as closely as possible to their MATLAB equivalents.
+Inputs can be arrays or scalar or a mixture, just like the MATLAB version. Outputs also correspond as closely as possible to their MATLAB equivalents. For now, please consult the documentation comments within the main function (in src/CO2System.jl) for full details.
 
 Original README for the MATLAB version follows.
 
