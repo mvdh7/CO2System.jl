@@ -18,7 +18,31 @@ DATA, HEADERS, NICEHEADERS =
     SI,PO4,pHSCALEIN,K1K2CONSTANTS,KSO4CONSTANTS)
 ```
 
-Inputs can be arrays or scalar or a mixture, just like the MATLAB version. Outputs also correspond as closely as possible to their MATLAB equivalents. For now, please consult the documentation comments within the main function (in src/CO2System.jl) for full details.
+Inputs can be arrays or scalar or a mixture, just like the MATLAB version. Outputs also correspond as closely as possible to their MATLAB equivalents. For now, please consult the documentation comments within the main function (in [src/CO2System.jl](https://github.com/mvdh7/CO2System.jl/blob/master/src/CO2System.jl)) for full details.
+
+The original MATLAB examples have also been converted into Julia (in [examples/](https://github.com/mvdh7/CO2System.jl/tree/master/examples)). These should work if you have installed CO2System.jl as described above. To run them, download the files and include in the REPL, for example:
+
+```julia
+julia> include("CO2SystemExample2.jl")
+
+Here is another example:
+
+What is the pH on the Seawater Scale at 2 degrees, 4000 meters deep of a sample
+that has a pH of 7.8 on the Total Scale at 25 degrees at atmospheric pressure?
+
+(Addional info: alk=2400, si=50, po4=2, dissociation constats: Mehrbach Refit)
+
+The answer:
+7.99035705953435
+
+See CO2SystemExample2.jl to see what the syntax for this calculation was.
+
+Main.CO2SystemExample2
+
+julia>
+```
+
+Note that the first example file requires you to have installed [Plots.jl](https://github.com/JuliaPlots/Plots.jl).
 
 Original README for the MATLAB version follows.
 
