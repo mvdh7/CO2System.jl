@@ -1,0 +1,4 @@
+name = "CO2System.jl"
+uuid = "f00bc630-3c04-11e9-22cb-9d48d87370ce"
+authors = ["Matthew Humphreys <m.p.humphreys@cantab.net>"]
+version = "2.0.5-jl1"
