@@ -25,8 +25,7 @@ k1k2c   =    4    # Choice of H2CO3 and HCO3- dissociation constants K1 and K2 (
 kso4c   =    1    # Choice of HSO4- dissociation constants KSO4 ("1" means "Dickson")
 
 # Import CO2SYS
-include("../src/CO2System.jl")
-using .CO2System
+using CO2System
 
 # Do the calculation. See CO2SYS's help for syntax and output format
 A = CO2SYS(par1,par2,par1type,par2type,sal,tempin,tempout,presin,presout,
