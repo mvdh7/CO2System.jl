@@ -1,11 +1,11 @@
 # CO2SYS.jl
 
-Port of CO2SYS v2.0.5 into Julia.
+Port of CO2SYS v2.0.5 into Julia v1.1.
 
 Installation:
 
 ```julia
-(v1.1) pkg> add https://github.com/mvdh7/CO2System.jl
+pkg> add https://github.com/mvdh7/CO2System.jl
 ```
 
 Usage:
