@@ -1,5 +1,7 @@
 # CO2System.jl
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6395674.svg)](https://doi.org/10.5281/zenodo.6395674)
+
 Port of CO2SYS v2.0.5 into Julia v1.1.
 
 Installation:
@@ -53,6 +55,7 @@ Original README for the MATLAB version follows.
 - If you use any CO2SYS related software, please cite the original work by Lewis and Wallace (1998).
 - If you use CO2SYS.m, please cite van Heuven et al (2011).
 - If you use errors.m or derivnum.m, please cite Orr et al. (2018).
+- If you use CO2System.jl, please cite [Humphreys et al. (2022)](https://doi.org/10.5281/zenodo.6395674).
 
 **CO2SYS-MATLAB versions**
 
